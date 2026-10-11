@@ -1,6 +1,8 @@
 package com.billetterie.billetterie.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 /**
@@ -12,6 +14,8 @@ public class TarifEvenement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Positive
+    @Column(nullable = false)
     private BigDecimal prix;
     @ManyToOne
     @JoinColumn(name = "evenement_id")

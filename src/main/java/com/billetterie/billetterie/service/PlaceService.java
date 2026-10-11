@@ -3,6 +3,7 @@ package com.billetterie.billetterie.service;
 import com.billetterie.billetterie.dto.*;
 import com.billetterie.billetterie.entity.Categorie;
 import com.billetterie.billetterie.entity.Place;
+import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.repository.CategorieRepository;
 import com.billetterie.billetterie.repository.PlaceRepository;
 import com.billetterie.billetterie.entity.Salle;
@@ -49,7 +50,7 @@ public class PlaceService extends AbstractCrudService{
                         .build())
                 .categorie(CategorieResponseDto.builder()
                         .id(place.getCategorie().getId())
-                        .nom(place.getCategorie().getNom())
+                        .nom(place.getCategorie().getLibelle())
                         .description(place.getCategorie().getDescription())
                         .build())
                 .build();
@@ -58,9 +59,9 @@ public class PlaceService extends AbstractCrudService{
     public PlaceResponseDto create(RequestDto requestDto) {
         PlaceRequestDto placeRequest = (PlaceRequestDto) requestDto;
         Salle salle = salleRepository.findById(placeRequest.getSalleId())
-                .orElseThrow(() -> new RuntimeException("Categorie non trouvée"));
+                .orElseThrow(() -> new NotFoundException("Categorie non trouvée"));
         Categorie categorie = categorieRepository.findById(placeRequest.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Categorie non trouvée"));
+                .orElseThrow(() -> new NotFoundException("Categorie non trouvée"));
         Place place = toEntity(placeRequest, salle, categorie);
         return toDto(placeRepository.save(place));
     }
@@ -68,10 +69,10 @@ public class PlaceService extends AbstractCrudService{
     public PlaceResponseDto update(Long id, RequestDto requestDto) {
         PlaceRequestDto placeRequest = (PlaceRequestDto) requestDto;
         Salle salle = salleRepository.findById(placeRequest.getSalleId())
-                .orElseThrow(() -> new RuntimeException("Salle non trouvée"));
+                .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
         Categorie categorie = categorieRepository.findById(placeRequest.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Categorie non trouvée"));
-        Place place = placeRepository.findById(id).orElseThrow(() -> new RuntimeException("Place non trouvée"));
+                .orElseThrow(() -> new NotFoundException("Categorie non trouvée"));
+        Place place = placeRepository.findById(id).orElseThrow(() -> new NotFoundException("Place non trouvée"));
         place.setNumero(placeRequest.getNumero());
         place.setRang(placeRequest.getRang());
         place.setSalle(salle);

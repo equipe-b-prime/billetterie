@@ -1,6 +1,8 @@
 package com.billetterie.billetterie.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 /**
@@ -15,8 +17,7 @@ public class Paiement {
 
     @Column(nullable = false)
     private BigDecimal montant;
-
-    @Column(name = "date_paiement", nullable = false)
+    @FutureOrPresent(message = "la Date  ne  doit pas etre une date dans le passé")    @Column(name = "date_paiement", nullable = false)
     private LocalDateTime datePaiement;
 
     @Column(length = 50)

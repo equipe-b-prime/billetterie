@@ -89,7 +89,7 @@ public class EvenementService extends AbstractCrudService{
     @Override
     public ResponseDto update(Long id, RequestDto requestDto) {
         EvenementRequestDto evenementRequest = (EvenementRequestDto) requestDto;
-        Evenement evenement = evenementRepository.findById(id).orElseThrow(() -> new RuntimeException("Événement non trouvé"));
+        Evenement evenement = evenementRepository.findById(id).orElseThrow(() -> new RuntimeException(NOT_FOUND_MESSAGE));
         if (evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("L'horaire de l'événement ne peut pas être dans le passé");
         }

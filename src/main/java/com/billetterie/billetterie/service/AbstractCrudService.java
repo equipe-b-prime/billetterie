@@ -1,6 +1,7 @@
 package com.billetterie.billetterie.service;
 
 import com.billetterie.billetterie.dto.ResponseDto;
+import com.billetterie.billetterie.exception.NotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
@@ -11,7 +12,8 @@ import java.util.List;
  * Les classes enfants (ex: CategorieService, SalleService) héritent de ces méthodes
  * et se concentrent uniquement sur la création, la modification et le mapping (DTO/Entité).
  */
-public abstract class AbstractCrudService implements CrudService{
+public abstract class AbstractCrudService implements CrudService {
+
 
     /**
      * Le repository global utilisé pour les opérations génériques (find, delete).
@@ -47,25 +49,26 @@ public abstract class AbstractCrudService implements CrudService{
      *
      * @param id l'identifiant unique de l'entité recherchée
      * @return un objet {@link ResponseDto} représentant l'entité trouvée
-     * @throws RuntimeException si aucune entité ne correspond à cet identifiant
-     * @throws Throwable pour gérer les exceptions génériques levées par le orElseThrow
+     * @throws NotFoundException si aucune entité ne correspond à cet identifiant
      */
+
     public ResponseDto getById(Long id) throws Throwable {
-        Object entity = repository.findById(id).orElseThrow(() -> new RuntimeException("Élément non trouvé"));
+        Object entity = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
         return toDto(entity);
     }
+
     /**
      * Supprime une entité de la base de données après avoir vérifié son existence,
      * puis retourne les informations de l'entité supprimée.
      *
      * @param id l'identifiant de l'entité à supprimer
      * @return un objet {@link ResponseDto} contenant les données de l'entité tout juste supprimée
-     * @throws RuntimeException si l'entité à supprimer n'existe pas
-     * @throws Throwable pour gérer les exceptions génériques levées par le orElseThrow
+     * @throws NotFoundException si l'entité à supprimer n'existe pas
      */
-    public ResponseDto delete(Long id) throws Throwable {
+    public ResponseDto delete(Long id) throws Throwable{
         Object entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Élément non trouvé"));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
         repository.deleteById(id);
         return toDto(entity);
     }

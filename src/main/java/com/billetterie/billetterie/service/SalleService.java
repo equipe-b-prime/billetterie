@@ -5,6 +5,7 @@ import com.billetterie.billetterie.dto.ResponseDto;
 import com.billetterie.billetterie.dto.SalleRequestDto;
 import com.billetterie.billetterie.dto.SalleResponseDto;
 import com.billetterie.billetterie.entity.Salle;
+import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.repository.SalleRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Request;
@@ -51,7 +52,7 @@ public class SalleService extends AbstractCrudService {
     @Override
     public ResponseDto update(Long id, RequestDto requestDto) {
         SalleRequestDto salleRequest = (SalleRequestDto)  requestDto;
-        Salle salle = salleRepository.findById(id).orElseThrow(() -> new RuntimeException("Salle non trouvée"));
+        Salle salle = salleRepository.findById(id).orElseThrow(() -> new NotFoundException("Salle non trouvée"));
             salle.setNom(salleRequest.getNom());
             salle.setVille(salleRequest.getVille());
             salle.setCapacite(salleRequest.getCapacite());

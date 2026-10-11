@@ -7,7 +7,11 @@ import lombok.*;
  * Représente la place dans la salle pour l'evenement
  */
 @Entity
-@Table(name = "place")
+@Table(name = "place",uniqueConstraints = {
+        @UniqueConstraint(columnNames = {
+                "salle","rang","numero"
+        })
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

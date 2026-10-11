@@ -1,7 +1,9 @@
 package com.billetterie.billetterie.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.antlr.v4.runtime.misc.NotNull;
 
 /**
  * Représente la categorie de la place
@@ -18,7 +20,8 @@ public class Categorie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(length =30, nullable = false, unique = true)
-    private String nom;
+    @NotBlank(message = "Le nom ne peut pas être vide")
+    private String libelle;
     @Column(length = 255)
     private String description;
 }

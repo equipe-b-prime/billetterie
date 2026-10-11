@@ -7,7 +7,11 @@ import lombok.*;
  * Représente la salle de evenement
  */
 @Entity
-@Table(name = "salle")
+@Table(name = "salle",uniqueConstraints = {
+        @UniqueConstraint(columnNames = {
+                "nom","ville"
+        })
+})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

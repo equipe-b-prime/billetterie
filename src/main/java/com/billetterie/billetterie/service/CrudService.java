@@ -2,6 +2,7 @@ package com.billetterie.billetterie.service;
 
 import com.billetterie.billetterie.dto.RequestDto;
 import com.billetterie.billetterie.dto.ResponseDto;
+import com.billetterie.billetterie.exception.NotFoundException;
 
 /**
  * Contrat définissant les opérations d'écriture (création, modification)
@@ -10,6 +11,11 @@ import com.billetterie.billetterie.dto.ResponseDto;
  * ces méthodes pour garantir une architecture uniforme.
  */
 public interface CrudService {
+
+    /**
+     * Message d'erreur par défaut lorsque l'entité recherchée n'est pas trouvée en base de données.
+     */
+    String NOT_FOUND_MESSAGE = "La ressource demandée est introuvable.";
 
     /**
      * Crée une nouvelle ressource en base de données à partir des données reçues.
@@ -27,7 +33,7 @@ public interface CrudService {
      * @return un objet {@link ResponseDto} représentant la ressource mise à jour
      * @throws RuntimeException si la ressource correspondante n'est pas trouvée
      */
-    ResponseDto update(Long id, RequestDto request);
+    ResponseDto update(Long id, RequestDto request) ;
 
     /**
      * Transforme une entité issue de la base de données (Object) en un DTO de réponse.
@@ -37,5 +43,4 @@ public interface CrudService {
      * @return un objet {@link ResponseDto} prêt à être envoyé au client HTTP
      */
     ResponseDto toDto(Object entity);
-
 }

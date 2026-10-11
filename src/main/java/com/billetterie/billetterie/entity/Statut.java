@@ -1,6 +1,7 @@
 package com.billetterie.billetterie.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 /**
@@ -12,11 +13,17 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "statut")
+@Table(name = "statut",uniqueConstraints = {
+        @UniqueConstraint(columnNames = {
+                "libelle"
+        })
+})
 
 public class Statut {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank(message = "Le libelle est obligatoire")
+    @Column(nullable = false)
     private String libelle;
 }

@@ -60,7 +60,7 @@ public class SalleController {
      * @return SalleResponseDto Les détails de la salle supprimée.
      */
     @DeleteMapping("/{id}")
-    public ResponseDto deleteSalle(@PathVariable Long id) throws Throwable {
+    public ResponseDto deleteSalle(@PathVariable Long id) throws Throwable{
         return salleService.delete(id);
     }
 }

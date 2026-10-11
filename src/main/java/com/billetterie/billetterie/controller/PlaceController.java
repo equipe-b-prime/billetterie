@@ -34,7 +34,7 @@
          * @return PlaceResponseDto Les détails de la place récupérée.
          */
         @GetMapping("/{id}")
-        public ResponseDto getPlaceById(@PathVariable Long id) throws Throwable {
+        public ResponseDto getPlaceById(@PathVariable Long id) throws Throwable{
             return placeService.getById(id);
         }
 
@@ -71,7 +71,7 @@
          * @return PlaceResponseDto Les détails de la place supprimée.
          */
         @DeleteMapping("/{id}")
-        public ResponseDto deletePlaceByIdd(@PathVariable Long id) throws Throwable {
+        public ResponseDto deletePlaceByIdd(@PathVariable Long id)throws Throwable {
             return placeService.delete(id);
         }
     }

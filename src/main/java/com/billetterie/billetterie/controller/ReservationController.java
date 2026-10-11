@@ -43,7 +43,7 @@ public class ReservationController {
      * @return ReservationResponseDto Les détails de la réservation supprimée.
      */
     @DeleteMapping("/{id}")
-    public ResponseDto deleteById(@PathVariable Long id) throws Throwable {
+    public ResponseDto deleteById(@PathVariable Long id) throws Throwable{
         return reservationService.delete(id);
     }
 

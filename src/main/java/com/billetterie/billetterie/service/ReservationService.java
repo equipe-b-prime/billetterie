@@ -3,6 +3,7 @@ package com.billetterie.billetterie.service;
 import com.billetterie.billetterie.dto.*;
 import com.billetterie.billetterie.entity.Client;
 import com.billetterie.billetterie.entity.Reservation;
+import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.repository.ClientRepository;
 import com.billetterie.billetterie.entity.Evenement;
 import com.billetterie.billetterie.repository.EvenementRepository;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class ReservationService extends AbstractCrudService implements CrudService{
+public class ReservationService extends AbstractCrudService{
 
     private  final ReservationRepository reservationRepository;
     private final StatutRepository statutRepository;
@@ -82,13 +83,13 @@ public class ReservationService extends AbstractCrudService implements CrudServi
     public ResponseDto update(Long id,RequestDto requestDto) {
         ReservationRequestDto reservationRequest = (ReservationRequestDto) requestDto;
         Statut statut = statutRepository.findById(reservationRequest.getStatutId())
-                .orElseThrow(() -> new RuntimeException("Statut non trouvé"));
+                .orElseThrow(() -> new NotFoundException("Statut non trouvé"));
         Client client = clientRepository.findById(reservationRequest.getClientId())
-                .orElseThrow(() -> new RuntimeException("Client non trouvé"));
+                .orElseThrow(() -> new NotFoundException("Client non trouvé"));
         Evenement evenement = evenementRepository.findById(reservationRequest.getEvenementId())
-                .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
+                .orElseThrow(() -> new NotFoundException("Événement non trouvé"));
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Réservation non trouvée"));
+                .orElseThrow(() -> new NotFoundException("Réservation non trouvée"));
         reservation.setDatePaiement(reservationRequest.getDatePaiement());
         reservation.setDateAnnulation(reservationRequest.getDateAnnulation());
         reservation.setMontantTotal(reservationRequest.getMontantTotal());
@@ -102,11 +103,11 @@ public class ReservationService extends AbstractCrudService implements CrudServi
     public ResponseDto create(RequestDto requestDto) {
         ReservationRequestDto reservationRequest = (ReservationRequestDto) requestDto;
         Statut statut = statutRepository.findById(reservationRequest.getStatutId())
-                .orElseThrow(() -> new RuntimeException("Statut non trouvé"));
+                .orElseThrow(() -> new NotFoundException("Statut non trouvé"));
         Client client = clientRepository.findById(reservationRequest.getClientId())
-                .orElseThrow(() -> new RuntimeException("Client non trouvé"));
+                .orElseThrow(() -> new NotFoundException("Client non trouvé"));
         Evenement evenement = evenementRepository.findById(reservationRequest.getEvenementId())
-                .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
+                .orElseThrow(() -> new NotFoundException("Événement non trouvé"));
         Reservation reservation = toEntity(reservationRequest,statut, client, evenement);
         reservation.setDateCreation(LocalDateTime.now());
         return toDto(reservationRepository.save(reservation));

@@ -38,7 +38,7 @@ public class EvenementController {
      * @return EvenementResponseDto Les détails de l'événement récupéré.
      */
     @GetMapping("/{id}")
-    public ResponseDto getById(@PathVariable Long id) throws Throwable {
+    public ResponseDto getById(@PathVariable Long id) throws Throwable{
         return evenementService.getById(id);
     }
 
@@ -71,7 +71,7 @@ public class EvenementController {
      * @return EvenementResponseDto Les détails de l'événement supprimé.
      */
     @DeleteMapping("/{id}")
-    public ResponseDto delete(@PathVariable Long id) throws Throwable {
+    public ResponseDto delete(@PathVariable Long id) throws Throwable{
         return evenementService.delete(id);
     }
 }
