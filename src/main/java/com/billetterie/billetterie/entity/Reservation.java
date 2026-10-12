@@ -2,7 +2,6 @@ package com.billetterie.billetterie.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.PastOrPresent;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -25,7 +24,6 @@ public class Reservation {
     private Long id;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @PastOrPresent
     @Column(name = "date_creation")
     private LocalDateTime dateCreation;
 
