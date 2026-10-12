@@ -18,7 +18,7 @@ public class Categorie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(length =30, nullable = false, unique = true)
-    private String nom;
+    private String libelle;
     @Column(length = 255)
     private String description;
 }
