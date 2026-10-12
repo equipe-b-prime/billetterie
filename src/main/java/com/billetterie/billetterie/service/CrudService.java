@@ -31,9 +31,9 @@ public interface CrudService {
      * @param id l'identifiant unique de la ressource à modifier
      * @param request l'objet {@link RequestDto} contenant les  informations
      * @return un objet {@link ResponseDto} représentant la ressource mise à jour
-     * @throws RuntimeException si la ressource correspondante n'est pas trouvée
+     * @throws NotFoundException si la ressource correspondante n'est pas trouvée
      */
-    ResponseDto update(Long id, RequestDto request) ;
+    ResponseDto update(Long id, RequestDto request);
 
     /**
      * Transforme une entité issue de la base de données (Object) en un DTO de réponse.

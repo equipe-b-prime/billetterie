@@ -1,12 +1,13 @@
 package com.billetterie.billetterie.dto;
 
-import com.billetterie.billetterie.utils.response.Response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.LocalDateTime;
 
+/**
+ * Réponse représentant un événement, avec sa salle associée.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter

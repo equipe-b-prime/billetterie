@@ -1,6 +1,11 @@
 package com.billetterie.billetterie.dto;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+
+/**
+ * Requête de création ou de modification d'une catégorie.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

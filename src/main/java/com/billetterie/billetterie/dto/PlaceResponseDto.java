@@ -2,6 +2,9 @@ package com.billetterie.billetterie.dto;
 
 import lombok.*;
 
+/**
+ * Réponse représentant une place, avec sa salle et sa catégorie associées.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

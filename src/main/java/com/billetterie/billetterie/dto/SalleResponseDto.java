@@ -1,15 +1,18 @@
 package com.billetterie.billetterie.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+/**
+ * Réponse représentant une salle.
+ */
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonPropertyOrder({"id","nom", "ville", "capacite", "adresse"})
-public class SalleResponseDto implements ResponseDto{
+public class SalleResponseDto implements ResponseDto {
     private Long id;
     private String nom;
     private String ville;

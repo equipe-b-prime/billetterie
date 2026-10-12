@@ -2,21 +2,29 @@ package com.billetterie.billetterie.service;
 
 import com.billetterie.billetterie.dto.*;
 import com.billetterie.billetterie.entity.Evenement;
-import com.billetterie.billetterie.repository.EvenementRepository;
 import com.billetterie.billetterie.entity.Salle;
+import com.billetterie.billetterie.exception.NotFoundException;
+import com.billetterie.billetterie.repository.EvenementRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
-import com.billetterie.billetterie.utils.response.Response;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+/**
+ * Service métier gérant les événements.
+ * Fournit la création, la modification, la suppression et les conversions entité/DTO.
+ */
 @Service
-public class EvenementService extends AbstractCrudService{
+public class EvenementService extends AbstractCrudService {
     private final EvenementRepository evenementRepository;
     private final SalleRepository salleRepository;
 
+    /**
+     * Constructeur injectant les repositories des événements et des salles.
+     *
+     * @param evenementRepository le repository des événements
+     * @param salleRepository le repository des salles
+     */
     public EvenementService(EvenementRepository evenementRepository, SalleRepository salleRepository) {
         super(evenementRepository);
         this.evenementRepository = evenementRepository;
@@ -47,6 +55,7 @@ public class EvenementService extends AbstractCrudService{
                         .build())
                 .build();
     }
+
     /**
      * Convertit les données d'une requête en entité événement.
      *
@@ -54,7 +63,6 @@ public class EvenementService extends AbstractCrudService{
      * @param salle La salle associée à l'événement.
      * @return Evenement L'entité événement créée.
      */
-
     public Evenement toEntity(EvenementRequestDto evenementRequest, Salle salle) {
         return Evenement.builder()
                 .titre(evenementRequest.getTitre())
@@ -64,6 +72,7 @@ public class EvenementService extends AbstractCrudService{
                 .salle(salle)
                 .build();
     }
+
     /**
      * Crée un nouvel événement.
      *
@@ -73,12 +82,14 @@ public class EvenementService extends AbstractCrudService{
     @Override
     public ResponseDto create(RequestDto requestDto) {
         EvenementRequestDto evenementRequest = (EvenementRequestDto) requestDto;
-        Salle salle = salleRepository.findById(evenementRequest.getSalleId()).orElseThrow(() -> new RuntimeException("Salle non trouvée"));
+        Salle salle = salleRepository.findById(evenementRequest.getSalleId())
+                .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
         if (evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("L'horaire de l'événement ne peut pas être dans le passé");
-            }
-        return toDto(evenementRepository.save(toEntity(evenementRequest,salle)));
+        }
+        return toDto(evenementRepository.save(toEntity(evenementRequest, salle)));
     }
+
     /**
      * Modifie un événement existant.
      *
@@ -89,7 +100,10 @@ public class EvenementService extends AbstractCrudService{
     @Override
     public ResponseDto update(Long id, RequestDto requestDto) {
         EvenementRequestDto evenementRequest = (EvenementRequestDto) requestDto;
-        Evenement evenement = evenementRepository.findById(id).orElseThrow(() -> new RuntimeException(NOT_FOUND_MESSAGE));
+        Salle salle = salleRepository.findById(evenementRequest.getSalleId())
+                .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
+        Evenement evenement = evenementRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
         if (evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("L'horaire de l'événement ne peut pas être dans le passé");
         }
@@ -97,7 +111,7 @@ public class EvenementService extends AbstractCrudService{
         evenement.setDescription(evenementRequest.getDescription());
         evenement.setHoraire(evenementRequest.getHoraire());
         evenement.setPlacementLibre(evenementRequest.getPlacementLibre());
+        evenement.setSalle(salle);
         return toDto(evenementRepository.save(evenement));
     }
-
 }

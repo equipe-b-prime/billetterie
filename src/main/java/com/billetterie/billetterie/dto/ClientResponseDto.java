@@ -2,6 +2,9 @@ package com.billetterie.billetterie.dto;
 
 import lombok.*;
 
+/**
+ * Réponse représentant un client.
+ */
 @Getter
 @Setter
 @Builder

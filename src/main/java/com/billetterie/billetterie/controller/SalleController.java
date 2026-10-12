@@ -2,65 +2,86 @@ package com.billetterie.billetterie.controller;
 
 import com.billetterie.billetterie.dto.ResponseDto;
 import com.billetterie.billetterie.dto.SalleRequestDto;
-import com.billetterie.billetterie.dto.SalleResponseDto;
 import com.billetterie.billetterie.service.SalleService;
 import com.billetterie.billetterie.utils.response.Response;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Contrôleur REST exposant les endpoints de gestion des salles.
+ */
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/salle")
 public class SalleController {
 
     private final SalleService salleService;
+
     /**
-     * @Param Récupère la liste de toutes les salles.
-     * @return List<SalleResponseDto> La liste des salles.
+     * Constructeur injectant le service des salles.
+     *
+     * @param salleService le service métier des salles
+     */
+    public SalleController(SalleService salleService) {
+        this.salleService = salleService;
+    }
+
+    /**
+     * Récupère la liste de toutes les salles.
+     *
+     * @return Response<ResponseDto> La liste des salles encapsulée.
      */
     @GetMapping
-    public List<ResponseDto> getAllSalle() {
-        return salleService.getAll();
+    public Response<ResponseDto> getAll() {
+        return new Response<>(salleService.getAll());
     }
-    /**
-     * Crée une nouvelle salle.
-     * @param salleRequest Les données de la requête pour créer la salle.
-     * @return SalleResponseDto Les détails de la salle créée.
-     */
-    @PostMapping
-    public ResponseDto  createSalle(@RequestBody SalleRequestDto salleRequest) {
-        return salleService.create(salleRequest);
-    }
+
     /**
      * Récupère une salle à partir de son identifiant.
+     *
      * @param id L'identifiant de la salle à récupérer.
-     * @return SalleResponseDto Les détails de la salle récupérée.
+     * @return Response<ResponseDto> Les détails de la salle récupérée.
+     * @throws Throwable si la salle n'existe pas.
      */
     @GetMapping("/{id}")
-    public ResponseDto  getSalleById(@PathVariable Long id) throws Throwable {
-        return salleService.getById(id);
+    public Response<ResponseDto> getById(@PathVariable Long id) throws Throwable {
+        return new Response<>(salleService.getById(id));
     }
+
+    /**
+     * Crée une nouvelle salle.
+     *
+     * @param salleRequest Les données de la salle à créer.
+     * @return Response<ResponseDto> Les détails de la salle créée.
+     */
+    @PostMapping
+    public Response<ResponseDto> create(@Valid @RequestBody SalleRequestDto salleRequest) {
+        return new Response<>(salleService.create(salleRequest));
+    }
+
     /**
      * Modifie une salle existante.
+     *
      * @param id L'identifiant de la salle à modifier.
-     * @param salleRequest Les données de la requête pour modifier la salle.
-     * @return SalleResponseDto Les détails de la salle modifiée.
+     * @param salleRequest Les nouvelles données de la salle.
+     * @return Response<ResponseDto> Les détails de la salle modifiée.
      */
     @PutMapping("/{id}")
-    public ResponseDto updatesalle(
-            @PathVariable Long id,
-            @RequestBody SalleRequestDto salleRequest) {
-        return salleService.update(id, salleRequest);
+    public Response<ResponseDto> update(@PathVariable Long id,
+                                        @Valid @RequestBody SalleRequestDto salleRequest) {
+        return new Response<>(salleService.update(id, salleRequest));
     }
+
     /**
      * Supprime une salle à partir de son identifiant.
+     *
      * @param id L'identifiant de la salle à supprimer.
-     * @return SalleResponseDto Les détails de la salle supprimée.
+     * @return Response<ResponseDto> Les détails de la salle supprimée.
+     * @throws Throwable si la salle n'existe pas.
      */
     @DeleteMapping("/{id}")
-    public ResponseDto deleteSalle(@PathVariable Long id) throws Throwable{
-        return salleService.delete(id);
+    public Response<ResponseDto> delete(@PathVariable Long id) throws Throwable {
+        return new Response<>(salleService.delete(id));
     }
 }

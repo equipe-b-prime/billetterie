@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Représente le statut d'une réponse HTTP (code et message).
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
