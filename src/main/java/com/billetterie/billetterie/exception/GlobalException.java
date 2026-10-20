@@ -1,5 +1,6 @@
 package com.billetterie.billetterie.exception;
 
+import com.billetterie.billetterie.entity.Reservation;
 import com.billetterie.billetterie.utils.response.Response;
 import com.billetterie.billetterie.utils.response.Status;
 import org.springframework.http.HttpStatus;
@@ -8,11 +9,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Gestionnaire global des exceptions de l'application.
@@ -52,11 +51,59 @@ public class GlobalException {
      * @return ResponseEntity<Response> Le message d'erreur encapsulé.
      */
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Response> notFoundException(NotFoundException ex) {
-        Response<String> reponse = new Response<>(ex.getMessage());
-        reponse.setNombre(1L);
+    public ResponseEntity<Response<String>> notFoundException(NotFoundException ex) {
+        Response<String> reponse = new Response<>(Collections.emptyList());
+        reponse.setNombre(0L);
         reponse.setHasError(true);
-        reponse.setStatus(new Status(HttpStatus.NOT_FOUND.value(), "l'operation a echouée"));
+        reponse.setStatus(new Status(HttpStatus.NOT_FOUND.value(), "Ressource non trouvée : " + ex.getMessage()));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(reponse);
+    }
+
+    /**
+     * Gère les erreurs où paramètre envoyé dans une requête ne corresponde pas
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Response<List<String>> > MethodArgumentTypeMismatchException (MethodArgumentTypeMismatchException ex) {
+        String typeAtendu = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "inconnu";
+        switch (typeAtendu) {
+            case "int", "Long", "Integer" ->
+                typeAtendu = "entier";
+            case "boolean", "Boolean" ->
+                typeAtendu = "booléen";
+            case "String" ->
+                typeAtendu = "chaîne de caractères";
+            default ->
+                typeAtendu = "inconnu";
+        }
+        Response<List<String>> response = new Response<>(Collections.emptyList());
+        response.setData(null);
+        response.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), "Le parametre '" + ex.getName() + "' doit etre de type "+typeAtendu));
+        response.setHasError(true);
+        response.setNombre(0L);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(DoublonRessourceException.class)
+    public ResponseEntity<Response<String>> doublonRessourceException(DoublonRessourceException ex) {
+        Response<String> reponse = new Response<>(Collections.emptyList());
+        reponse.setNombre(0L);
+        reponse.setHasError(true);
+        reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), "Doublon de ressource : " + ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
+    }
+    @ExceptionHandler(RessourceUtiliseeException.class)
+    public ResponseEntity<Response<String>> ressourceUtiliseeException(RessourceUtiliseeException ex) {
+        Response<String> reponse = new Response<>(Collections.emptyList());
+        reponse.setNombre(0L);
+        reponse.setHasError(true);
+        reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Response<String>> illegalArgumentException(IllegalArgumentException ex) {
+        Response<String> reponse = new Response<>(Collections.emptyList());
+        reponse.setNombre(0L);
+        reponse.setHasError(true);
+        reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
     }
 }

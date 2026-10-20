@@ -7,8 +7,6 @@ import com.billetterie.billetterie.utils.response.Response;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * Contrôleur REST exposant les endpoints de gestion des salles.
  */
@@ -32,9 +30,11 @@ public class SalleController {
      *
      * @return Response<ResponseDto> La liste des salles encapsulée.
      */
+
     @GetMapping
-    public Response<ResponseDto> getAll() {
-        return new Response<>(salleService.getAll());
+    public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10")int taille) {
+        return new Response<>(salleService.getAll(page,taille).getContent());
     }
 
     /**
@@ -83,5 +83,17 @@ public class SalleController {
     @DeleteMapping("/{id}")
     public Response<ResponseDto> delete(@PathVariable Long id) throws Throwable {
         return new Response<>(salleService.delete(id));
+    }
+
+    /**
+     * Recherche une salle à partir de son nom.
+     *
+     * @param nom le nom de la salle recherchée
+     * @return Response<ResponseDto> Les détails de la salle trouvée.
+     * @throws Throwable si aucune salle ne porte ce nom.
+     */
+    @GetMapping("/recherche")
+    public Response<ResponseDto> getByNom(@RequestParam String nom) throws Throwable {
+        return new Response<>(salleService.getByNom(nom));
     }
 }

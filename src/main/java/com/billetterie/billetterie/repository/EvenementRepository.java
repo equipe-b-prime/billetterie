@@ -1,12 +1,50 @@
 package com.billetterie.billetterie.repository;
 
 import com.billetterie.billetterie.entity.Evenement;
+import com.billetterie.billetterie.entity.EvenementDetailView;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository de gestion des Evenements.
  */
 @Repository
 public interface EvenementRepository extends JpaRepository<Evenement, Long> {
+
+    /**
+     * Récupère le détail d'un événement à partir de la vue SQL.
+     *
+     * @param id l'identifiant de l'événement
+     * @return le détail de l'événement, s'il existe
+     */
+    @Query("SELECT v FROM EvenementDetailView v WHERE v.id = :id")
+    Optional<EvenementDetailView> findDetailViewById(@Param("id") Long id);
+
+    /**
+     * Récupère tous les détails d'événements depuis la vue SQL.
+     *
+     * @return la liste complète des détails d'événements
+     */
+    @Query("SELECT v FROM EvenementDetailView v")
+    List<EvenementDetailView> findAllDetailViews();
+
+    /**
+     * Récupère une page de détails d'événements depuis la vue SQL.
+     *
+     * @param pageable les paramètres de pagination
+     * @return la page des détails d'événements
+     */
+    @Query(value = "SELECT v FROM EvenementDetailView v",
+           countQuery = "SELECT count(v) FROM EvenementDetailView v")
+    Page<EvenementDetailView> findDetailViews(Pageable pageable);
+
+    boolean existsBySalleId(Long id);
+
 }

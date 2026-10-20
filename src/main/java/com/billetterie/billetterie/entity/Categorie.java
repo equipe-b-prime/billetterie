@@ -9,7 +9,11 @@ import org.antlr.v4.runtime.misc.NotNull;
  * Représente la categorie de la place
  */
 @Entity
-@Table(name = "categorie")
+@Table(name = "categorie"
+        ,indexes = {
+        @Index(name = "idx_categorie_libelle", columnList = "libelle")
+}
+)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

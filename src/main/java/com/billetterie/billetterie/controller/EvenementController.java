@@ -7,8 +7,6 @@ import com.billetterie.billetterie.utils.response.Response;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * Contrôleur REST exposant les endpoints de gestion des événements.
  */
@@ -27,13 +25,16 @@ public class EvenementController {
     }
 
     /**
-     * Récupère la liste de tous les événements.
+     * Récupère une page d'événements.
      *
-     * @return Response<ResponseDto> La liste des événements encapsulée.
+     * @param page l'index de la page souhaitée (0 par défaut)
+     * @param taille le nombre d'éléments par page (10 par défaut, borné à 100)
+     * @return Response<ResponseDto> La page des événements encapsulée.
      */
     @GetMapping
-    public Response<ResponseDto> getAll() {
-        return new Response<>(evenementService.getAll());
+    public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10") int taille) {
+        return new Response<>(evenementService.getAll(page, taille).getContent());
     }
 
     /**

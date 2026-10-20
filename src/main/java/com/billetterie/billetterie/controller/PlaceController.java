@@ -7,8 +7,6 @@ import com.billetterie.billetterie.utils.response.Response;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * Contrôleur REST exposant les endpoints de gestion des places.
  */
@@ -33,8 +31,9 @@ public class PlaceController {
      * @return Response<ResponseDto> La liste des places encapsulée.
      */
     @GetMapping
-    public Response<ResponseDto> getAll() {
-        return new Response<>(placeService.getAll());
+    public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10")int taille) {
+        return new Response<>(placeService.getAll(page,taille).getContent());
     }
 
     /**

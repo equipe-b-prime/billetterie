@@ -7,11 +7,14 @@ import lombok.*;
  * Représente la salle de evenement
  */
 @Entity
-@Table(name = "salle",uniqueConstraints = {
-        @UniqueConstraint(columnNames = {
-                "nom","ville"
-        })
-})
+@Table(name = "salle"
+        ,uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"nom","ville"})
+}
+//,indexes = {
+//        @Index(name = "idx_salle_nom",columnList = "nom")
+//}
+)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,12 +24,11 @@ public class Salle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, length = 100)
     private String nom;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String ville;
-    @Column(nullable = false)
-    private int capacite;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String adresse;
+    private int capacite;
 }

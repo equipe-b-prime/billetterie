@@ -4,10 +4,15 @@ import com.billetterie.billetterie.dto.*;
 import com.billetterie.billetterie.entity.Categorie;
 import com.billetterie.billetterie.entity.Place;
 import com.billetterie.billetterie.entity.Salle;
+import com.billetterie.billetterie.exception.DoublonRessourceException;
 import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.repository.CategorieRepository;
 import com.billetterie.billetterie.repository.PlaceRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -85,15 +90,25 @@ public class PlaceService extends AbstractCrudService {
      * @param requestDto Les données de la requête pour créer la place.
      * @return PlaceResponseDto Les détails de la place créée.
      */
+    @Transactional
     @Override
     public PlaceResponseDto create(RequestDto requestDto) {
         PlaceRequestDto placeRequest = (PlaceRequestDto) requestDto;
+        long nbPlacesActuelles = placeRepository.countBySalleId(placeRequest.getSalleId());
         Salle salle = salleRepository.findById(placeRequest.getSalleId())
                 .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
         Categorie categorie = categorieRepository.findById(placeRequest.getCategorieId())
                 .orElseThrow(() -> new NotFoundException("Categorie non trouvée"));
         Place place = toEntity(placeRequest, salle, categorie);
+        if (placeRepository.existsBySalleIdAndRangAndNumero(placeRequest.getSalleId(), placeRequest.getRang(),
+                placeRequest.getNumero())) {
+            throw new DoublonRessourceException("Une place avec le même rang et numéro existe déjà dans cette salle.");
+        }
+        if (nbPlacesActuelles + 1 > salle.getCapacite()) {
+            throw new IllegalArgumentException("La salle est pleine, impossible d'ajouter une nouvelle place.");
+        }
         return toDto(placeRepository.save(place));
+
     }
 
     /**
@@ -112,10 +127,30 @@ public class PlaceService extends AbstractCrudService {
                 .orElseThrow(() -> new NotFoundException("Categorie non trouvée"));
         Place place = placeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Place non trouvée"));
+        if (placeRepository.existsBySalleIdAndRangAndNumeroAndIdNot(placeRequest.getSalleId(), placeRequest.getRang(),
+                placeRequest.getNumero(), id)) {
+            throw new DoublonRessourceException("Une place avec le même rang et numéro existe déjà dans cette salle.");
+        }
         place.setNumero(placeRequest.getNumero());
         place.setRang(placeRequest.getRang());
         place.setSalle(salle);
         place.setCategorie(categorie);
         return toDto(placeRepository.save(place));
+    }
+
+    /**
+     * Récupère une page d'entités présentes dans la base de données
+     * et les convertit en DTOs de réponse.
+     * La page et la taille transmises sont normalisées par {@link CrudService}.
+     *
+     * @param page l'index de la page souhaitée
+     * @param taille le nombre d'éléments souhaités par page
+     * @return une page d'objets {@link ResponseDto}
+     */
+    @Override
+    public Page<ResponseDto> getAll(int page, int taille) {
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
+        return placeRepository.findAll(pageable)
+                .map(this::toDto);
     }
 }

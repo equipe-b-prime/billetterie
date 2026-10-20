@@ -18,6 +18,17 @@ public interface CrudService {
     String NOT_FOUND_MESSAGE = "La ressource demandée est introuvable.";
 
     /**
+     * Nombre d'éléments retournés par défaut lorsqu'une taille de page invalide est transmise.
+     */
+    int TAILLE_DEFAUT = 10;
+
+    /**
+     * Nombre maximal d'éléments qu'une requête paginée est autorisée à retourner.
+     */
+    int TAILLE_MAX = 100;
+
+
+    /**
      * Crée une nouvelle ressource en base de données à partir des données reçues.
      *
      * @param request l'objet {@link RequestDto} contenant les informations de création

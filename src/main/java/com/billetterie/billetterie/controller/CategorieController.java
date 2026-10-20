@@ -7,8 +7,6 @@ import com.billetterie.billetterie.utils.response.Response;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * Contrôleur REST exposant les endpoints de gestion des catégories.
  */
@@ -32,8 +30,9 @@ public class CategorieController {
      * @return Response<ResponseDto> La liste des catégories encapsulée.
      */
     @GetMapping
-    public Response<ResponseDto> getAll() {
-        return new Response<>(categorieService.getAll());
+    public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(defaultValue = "10")int taille) {
+        return new Response<>(categorieService.getAll(page,taille).getContent());
     }
 
     /**
@@ -46,6 +45,18 @@ public class CategorieController {
     @GetMapping("/{id}")
     public Response<ResponseDto> getById(@PathVariable Long id) throws Throwable {
         return new Response<>(categorieService.getById(id));
+    }
+
+    /**
+     * Recherche une catégorie à partir de son nom.
+     *
+     * @param nom le nom (libellé) de la catégorie recherchée
+     * @return Response<ResponseDto> Les détails de la catégorie trouvée.
+     * @throws Throwable si aucune catégorie ne porte ce nom.
+     */
+    @GetMapping("/recherche")
+    public Response<ResponseDto> getByNom(@RequestParam String nom) throws Throwable {
+        return new Response<>(categorieService.getByNom(nom));
     }
 
     /**

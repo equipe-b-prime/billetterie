@@ -9,7 +9,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "evenement",uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"titre", "horaire"})
+        @UniqueConstraint(columnNames = {"titre", "horaire"}
+        )
+},indexes = {
+        @Index(name = "id_evenement_titre",columnList = "titre")
 })
 @Getter
 @Setter
@@ -20,6 +23,7 @@ public class Evenement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, length = 150)
     private String titre;
     private String description;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

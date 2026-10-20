@@ -18,4 +18,5 @@ public class SalleResponseDto implements ResponseDto {
     private String ville;
     private int capacite;
     private String adresse;
+    private int nbplaceOccupee;
 }

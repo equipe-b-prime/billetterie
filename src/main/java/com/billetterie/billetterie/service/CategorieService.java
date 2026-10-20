@@ -8,6 +8,7 @@ import com.billetterie.billetterie.entity.Categorie;
 import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.repository.CategorieRepository;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 /**
  * Service métier gérant les catégories.
@@ -87,5 +88,11 @@ public class CategorieService extends AbstractCrudService {
         categorie.setDescription(categorieRequest.getDescription().trim());
         categorieRepository.save(categorie);
         return toDto(categorie);
+    }
+
+    public List<ResponseDto> getByNom(String libelle) {
+        Categorie categorie= categorieRepository.findByLibelle(libelle)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        return List.of(toDto(categorie));
     }
 }

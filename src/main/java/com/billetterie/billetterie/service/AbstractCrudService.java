@@ -2,6 +2,9 @@ package com.billetterie.billetterie.service;
 
 import com.billetterie.billetterie.dto.ResponseDto;
 import com.billetterie.billetterie.exception.NotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
@@ -32,16 +35,20 @@ public abstract class AbstractCrudService implements CrudService {
     }
 
     /**
-     * Récupère toutes les entités présentes dans la base de données
+     * Récupère une page d'entités présentes dans la base de données
      * et les convertit en DTOs de réponse.
+     * La page et la taille transmises sont normalisées par {@link CrudService}.
      *
-     * @return une liste d'objets {@link ResponseDto}
+     * @param page l'index de la page souhaitée
+     * @param taille le nombre d'éléments souhaités par page
+     * @return une page d'objets {@link ResponseDto}
      */
-    public List<ResponseDto> getAll() {
-        List<Object> entities = repository.findAll();
-        return entities.stream()
-                .map(this::toDto)
-                .toList();
+    public Page<ResponseDto> getAll(int page, int taille) {
+
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
+
+        return repository.findAll(pageable)
+                .map(this::toDto);
     }
 
     /**
@@ -58,6 +65,7 @@ public abstract class AbstractCrudService implements CrudService {
         return toDto(entity);
     }
 
+
     /**
      * Supprime une entité de la base de données après avoir vérifié son existence,
      * puis retourne les informations de l'entité supprimée.
@@ -72,4 +80,28 @@ public abstract class AbstractCrudService implements CrudService {
         repository.deleteById(id);
         return toDto(entity);
     }
+    /**
+     * Borne la taille de page demandée entre 1 et {@link #TAILLE_MAX}.
+     * Une valeur inférieure à 1 retombe sur {@link #TAILLE_DEFAUT}.
+     *
+     * @param taille la taille de page transmise par le client
+     * @return la taille de page autorisée
+     */
+    static int tailleAutorisee(int taille) {
+        if (taille < 1) {
+            return TAILLE_DEFAUT;
+        }
+        return Math.min(taille, TAILLE_MAX);
+    }
+
+    /**
+     * Normalise l'index de page en ramenant toute valeur négative à 0.
+     *
+     * @param page l'index de page transmis par le client
+     * @return l'index de page autorisé
+     */
+    static int pageAutorisee(int page) {
+        return Math.max(page, 0);
+    }
+
 }

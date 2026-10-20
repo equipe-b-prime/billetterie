@@ -1,5 +1,6 @@
 package com.billetterie.billetterie.utils.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @JsonPropertyOrder({"status", "nombre", "hasError", "data"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Response<T> {
     private Status status;
     private boolean hasError;
@@ -27,8 +29,8 @@ public class Response<T> {
      *
      * @param data la liste des données retournées
      */
-    public Response(List<T> data) {
-        this.status = new Status(800, "Opération effectuée avec succès");
+     public Response(List<T> data) {
+            this.status = new Status(800, "Opération effectuée avec succès");
         this.hasError = false;
         this.nombre = (long) data.size();
         this.data = data;

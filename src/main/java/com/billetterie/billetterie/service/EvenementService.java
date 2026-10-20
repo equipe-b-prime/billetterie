@@ -2,10 +2,14 @@ package com.billetterie.billetterie.service;
 
 import com.billetterie.billetterie.dto.*;
 import com.billetterie.billetterie.entity.Evenement;
+import com.billetterie.billetterie.entity.EvenementDetailView;
 import com.billetterie.billetterie.entity.Salle;
 import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.repository.EvenementRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,56 +19,75 @@ import java.time.LocalDateTime;
  * Fournit la création, la modification, la suppression et les conversions entité/DTO.
  */
 @Service
-public class EvenementService extends AbstractCrudService {
-    private final EvenementRepository evenementRepository;
-    private final SalleRepository salleRepository;
+    public class EvenementService implements CrudService{
+        private final EvenementRepository evenementRepository;
+        private final SalleRepository salleRepository;
 
-    /**
-     * Constructeur injectant les repositories des événements et des salles.
-     *
-     * @param evenementRepository le repository des événements
-     * @param salleRepository le repository des salles
-     */
-    public EvenementService(EvenementRepository evenementRepository, SalleRepository salleRepository) {
-        super(evenementRepository);
-        this.evenementRepository = evenementRepository;
-        this.salleRepository = salleRepository;
-    }
+        /**
+         * Constructeur injectant les repositories des événements et des salles.
+         *
+         * @param evenementRepository le repository des événements
+         * @param salleRepository le repository des salles
+         */
+        public EvenementService(EvenementRepository evenementRepository, SalleRepository salleRepository) {
+            this.evenementRepository = evenementRepository;
+            this.salleRepository = salleRepository;
+        }
 
-    /**
-     * Convertit une entité événement en objet de réponse.
-     *
-     * @param entity L'entité événement à convertir.
-     * @return EvenementResponseDto Les détails de l'événement converti.
-     */
-    @Override
-    public EvenementResponseDto toDto(Object entity) {
-        Evenement evenement = (Evenement) entity;
-        return EvenementResponseDto.builder()
-                .id(evenement.getId())
-                .titre(evenement.getTitre())
-                .description(evenement.getDescription())
-                .horaire(evenement.getHoraire())
-                .placementLibre(evenement.getPlacementLibre())
-                .salle(SalleResponseDto.builder()
-                        .id(evenement.getSalle().getId())
-                        .nom(evenement.getSalle().getNom())
-                        .ville(evenement.getSalle().getVille())
-                        .capacite(evenement.getSalle().getCapacite())
-                        .adresse(evenement.getSalle().getAdresse())
-                        .build())
-                .build();
-    }
+        /**
+         * Convertit une entité événement en objet de réponse.
+         *
+         * @param entity L'entité événement à convertir.
+         * @return EvenementResponseDto Les détails de l'événement converti.
+         */
+        @Override
+        public EvenementResponseDto toDto(Object entity) {
+            Evenement evenement = (Evenement) entity;
+            return EvenementResponseDto.builder()
+                    .id(evenement.getId())
+                    .titre(evenement.getTitre())
+                    .description(evenement.getDescription())
+                    .horaire(evenement.getHoraire())
+                    .placementLibre(evenement.getPlacementLibre())
+                    .salle(SalleResponseDto.builder()
+                            .id(evenement.getSalle().getId())
+                            .nom(evenement.getSalle().getNom())
+                            .ville(evenement.getSalle().getVille())
+                            .capacite(evenement.getSalle().getCapacite())
+                            .adresse(evenement.getSalle().getAdresse())
+                            .build())
+                    .build();
+        }
 
-    /**
-     * Convertit les données d'une requête en entité événement.
-     *
-     * @param evenementRequest Les données de la requête pour créer l'événement.
-     * @param salle La salle associée à l'événement.
-     * @return Evenement L'entité événement créée.
-     */
-    public Evenement toEntity(EvenementRequestDto evenementRequest, Salle salle) {
-        return Evenement.builder()
+
+        /**
+         * Convertit spécifiquement l'entité de la VUE SQL.
+         */
+        public EvenementResponseDto toDto(EvenementDetailView view) {
+            return EvenementResponseDto.builder()
+                    .id(view.getId())
+                    .titre(view.getTitre())
+                    .description(view.getDescription())
+                    .horaire(view.getHoraire())
+                    .placementLibre(view.getPlacementLibre())
+                    .salle(SalleResponseDto.builder()
+                            .id(view.getSalleId())
+                            .nom(view.getSalleNom())
+                            .ville(view.getSalleVille())
+                            .capacite(view.getSalleCapacite() != null ? view.getSalleCapacite() : 0)
+                            .adresse(view.getSalleAdresse())
+                            .build())
+                    .build();
+        }
+        /**
+         * Convertit les données d'une requête en entité événement.
+         *
+         * @param evenementRequest Les données de la requête pour créer l'événement.
+         * @param salle La salle associée à l'événement.
+         * @return Evenement L'entité événement créée.
+         */
+        public Evenement toEntity(EvenementRequestDto evenementRequest, Salle salle) {
+            return Evenement.builder()
                 .titre(evenementRequest.getTitre())
                 .description(evenementRequest.getDescription())
                 .horaire(evenementRequest.getHoraire())
@@ -114,4 +137,43 @@ public class EvenementService extends AbstractCrudService {
         evenement.setSalle(salle);
         return toDto(evenementRepository.save(evenement));
     }
+    /**
+     * Récupère un événement par son identifiant en s'appuyant sur la vue SQL.
+     *
+     * @param id l'identifiant de l'événement recherché
+     * @return un objet {@link ResponseDto} représentant l'événement trouvé
+     * @throws NotFoundException si aucun événement ne correspond à cet identifiant
+     */
+    public ResponseDto getById(Long id) {
+        EvenementDetailView view = evenementRepository.findDetailViewById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        return toDto(view);
+    }
+
+    /**
+     * Récupère une page d'événements à partir de la vue SQL.
+     *
+     * @param page l'index de la page souhaitée
+     * @param taille le nombre d'éléments souhaités par page
+     * @return une page d'objets {@link ResponseDto}
+     */
+    public Page<ResponseDto> getAll(int page, int taille) {
+        Pageable pageable = PageRequest.of(page, taille);
+        return evenementRepository.findDetailViews(pageable)
+                .map(view -> toDto(view));
+    }
+
+    /**
+     * Supprime un événement à partir de son identifiant.
+     *
+     * @param id l'identifiant de l'événement à supprimer
+     * @return EvenementResponseDto Les détails de l'événement supprimé.
+     * @throws NotFoundException si l'événement n'existe pas
+     */
+    public EvenementResponseDto delete(Long id) throws Throwable{
+        Object entity = evenementRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        evenementRepository.deleteById(id);
+        return toDto(entity);
+        }
 }

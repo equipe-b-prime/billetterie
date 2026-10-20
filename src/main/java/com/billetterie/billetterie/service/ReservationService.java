@@ -10,9 +10,14 @@ import com.billetterie.billetterie.repository.ClientRepository;
 import com.billetterie.billetterie.repository.EvenementRepository;
 import com.billetterie.billetterie.repository.ReservationRepository;
 import com.billetterie.billetterie.repository.StatutRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Service métier gérant les réservations.
@@ -150,5 +155,45 @@ public class ReservationService extends AbstractCrudService {
         Reservation reservation = toEntity(reservationRequest, statut, client, evenement);
         reservation.setDateCreation(LocalDateTime.now());
         return toDto(reservationRepository.save(reservation));
+    }
+
+
+    /**
+     * Récupère une page des réservations d'un client spécifique.
+     *
+     * @param clientId l'identifiant du client
+     * @param page l'index de la page souhaitée
+     * @param taille le nombre d'éléments souhaités par page
+     * @return une page d'objets {@link ResponseDto}
+     */
+    public Page<ResponseDto> getReservationByIdClient(long clientId, int page, int taille) {
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille), Sort.by("id"));
+        return reservationRepository.findByClientId(clientId, pageable).map(this::toDto);
+    }
+
+    /**
+     * Récupère une page des réservations ayant un statut spécifique.
+     *
+     * @param statutId l'identifiant du statut
+     * @param page l'index de la page souhaitée
+     * @param taille le nombre d'éléments souhaités par page
+     * @return une page d'objets {@link ResponseDto}
+     */
+    public Page<ResponseDto> getReservationByIdStatut(long statutId, int page, int taille) {
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille), Sort.by("id"));
+        return reservationRepository.findByStatutId(statutId, pageable).map(this::toDto);
+    }
+
+    /**
+     * Récupère une page des réservations d'un événement spécifique.
+     *
+     * @param id l'identifiant de l'événement
+     * @param page l'index de la page souhaitée
+     * @param taille le nombre d'éléments souhaités par page
+     * @return une page d'objets {@link ResponseDto}
+     */
+    public Page<ResponseDto> getReservationByIdEvenement(long id, int page, int taille) {
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille), Sort.by("id"));
+        return reservationRepository.findByEvenementId(id, pageable).map(this::toDto);
     }
 }

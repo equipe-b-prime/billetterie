@@ -9,9 +9,10 @@ import lombok.*;
 @Entity
 @Table(name = "place",uniqueConstraints = {
         @UniqueConstraint(columnNames = {
-                "salle","rang","numero"
+                "salle_id","rang","numero"
         })
-})
+},indexes = @Index(name = "idx_place_salle_rang_numero", columnList = "salle_id, rang, numero")
+)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

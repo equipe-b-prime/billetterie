@@ -4,10 +4,19 @@ import com.billetterie.billetterie.dto.RequestDto;
 import com.billetterie.billetterie.dto.ResponseDto;
 import com.billetterie.billetterie.dto.SalleRequestDto;
 import com.billetterie.billetterie.dto.SalleResponseDto;
+import com.billetterie.billetterie.entity.Categorie;
+import com.billetterie.billetterie.entity.Place;
 import com.billetterie.billetterie.entity.Salle;
+import com.billetterie.billetterie.exception.DoublonRessourceException;
 import com.billetterie.billetterie.exception.NotFoundException;
+import com.billetterie.billetterie.exception.RessourceUtiliseeException;
+import com.billetterie.billetterie.repository.EvenementRepository;
+import com.billetterie.billetterie.repository.PlaceRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
+import org.hibernate.annotations.DialectOverride;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Service métier gérant les salles.
@@ -16,15 +25,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class SalleService extends AbstractCrudService {
     private final SalleRepository salleRepository;
+    private final EvenementRepository evenementRepository;
+    private final PlaceRepository placeRepository;
+
 
     /**
      * Constructeur injectant le repository des salles.
      *
      * @param salleRepository le repository des salles
      */
-    public SalleService(SalleRepository salleRepository) {
+    public SalleService(SalleRepository salleRepository, EvenementRepository evenementRepository, PlaceRepository placeRepository) {
         super(salleRepository);
         this.salleRepository = salleRepository;
+        this.evenementRepository = evenementRepository;
+        this.placeRepository = placeRepository;
     }
 
     /**
@@ -51,12 +65,14 @@ public class SalleService extends AbstractCrudService {
     @Override
     public ResponseDto toDto(Object entity) {
         Salle salle = (Salle) entity;
+        int totalPlacesEnregistrees = (int) placeRepository.countBySalleId(salle.getId());
         return SalleResponseDto.builder()
                 .id(salle.getId())
                 .nom(salle.getNom())
                 .ville(salle.getVille())
                 .capacite(salle.getCapacite())
                 .adresse(salle.getAdresse())
+                .nbplaceOccupee(totalPlacesEnregistrees)
                 .build();
     }
 
@@ -69,6 +85,10 @@ public class SalleService extends AbstractCrudService {
     @Override
     public ResponseDto create(RequestDto requestDto) {
         SalleRequestDto salleRequest = (SalleRequestDto) requestDto;
+        if(salleRepository.existsByNomAndVille(salleRequest.getNom(), salleRequest.getVille())) {
+            throw new DoublonRessourceException("Une salle nommée '" + salleRequest.getNom() + "' existe déjà à "
+                    + salleRequest.getVille());
+        }
         Salle salle = salleRepository.save(toEntity(salleRequest));
         return toDto(salle);
     }
@@ -85,11 +105,50 @@ public class SalleService extends AbstractCrudService {
         SalleRequestDto salleRequest = (SalleRequestDto) requestDto;
         Salle salle = salleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
+        boolean nomOuVilleModifie = !salle.getNom().equalsIgnoreCase(salleRequest.getNom())
+                || !salle.getVille().equalsIgnoreCase(salleRequest.getVille());
+
+        if (nomOuVilleModifie && salleRepository.existsByNomAndVille(salleRequest.getNom(), salleRequest.getVille())) {
+            throw new DoublonRessourceException("Une autre salle nommée '" + salleRequest.getNom() + "' existe déjà à "
+                    + salleRequest.getVille());
+        }
+        if (salleRequest.getCapacite() < placeRepository.countBySalleId(id) ) {
+          throw new IllegalArgumentException("La capacité (" + salleRequest.getCapacite() + ") ne peut pas être" +
+                  " inférieure au nombre de places déjà enregistrées (" + placeRepository.countBySalleId(id)  + ").");        }
         salle.setNom(salleRequest.getNom());
         salle.setVille(salleRequest.getVille());
         salle.setCapacite(salleRequest.getCapacite());
         salle.setAdresse(salleRequest.getAdresse());
         salleRepository.save(salle);
         return toDto(salle);
+    }
+
+    public ResponseDto getByNom(String libelle) {
+        Salle salle = salleRepository.findByNom(libelle)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        return toDto(salle);
+    }
+
+    /**
+     * Supprime une entité de la base de données après avoir vérifié son existence,
+     * puis retourne les informations de l'entité supprimée.
+     *
+     * @param id l'identifiant de l'entité à supprimer
+     * @return un objet {@link ResponseDto} contenant les données de l'entité tout juste supprimée
+     * @throws NotFoundException si l'entité à supprimer n'existe pas
+     */
+    @Override
+    public ResponseDto delete(Long id) throws Throwable{
+        Object entity = salleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        boolean evenementUtilisee = evenementRepository.existsBySalleId(id);
+        boolean placeUtilisee = placeRepository.existsBySalleId(id);
+        if (evenementUtilisee) {
+            throw new RessourceUtiliseeException("Salle",id,"Evenement");
+        }if (placeUtilisee) {
+            throw new RessourceUtiliseeException("Salle",id,"Place");
+        }
+        salleRepository.deleteById(id);
+        return toDto(entity);
     }
 }
