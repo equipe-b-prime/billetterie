@@ -6,6 +6,7 @@ import com.billetterie.billetterie.entity.Place;
 import com.billetterie.billetterie.entity.Salle;
 import com.billetterie.billetterie.exception.DoublonRessourceException;
 import com.billetterie.billetterie.exception.NotFoundException;
+import com.billetterie.billetterie.exception.RessourceUtiliseeException;
 import com.billetterie.billetterie.repository.BilletRepository;
 import com.billetterie.billetterie.repository.CategorieRepository;
 import com.billetterie.billetterie.repository.PlaceRepository;
@@ -162,7 +163,7 @@ public class PlaceService extends AbstractCrudService {
      */
     @Override
     public Page<ResponseDto> getAll(int page, int taille) {
-        Sort sort = Sort.by(Sort.Order.asc("rang"), Sort.Order.asc("numero"));
+        Sort sort = Sort.by(Sort.Order.desc("rang"), Sort.Order.asc("numero"));
         Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille),sort);
         return placeRepository.findAll(pageable)
                 .map(this::toDto);
@@ -179,7 +180,7 @@ public class PlaceService extends AbstractCrudService {
         Object entity = placeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
         if(billetRepository.existsByPlaceId(id)){
-            throw new IllegalArgumentException("Impossible de supprimer une place qui a déjà été réservée.");
+            throw new RessourceUtiliseeException("Place",id,"Billet");
         }
         placeRepository.deleteById(id);
         return toDto(entity);

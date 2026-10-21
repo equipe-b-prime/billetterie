@@ -3,13 +3,18 @@ package com.billetterie.billetterie.service;
 import com.billetterie.billetterie.dto.*;
 import com.billetterie.billetterie.entity.Evenement;
 import com.billetterie.billetterie.entity.EvenementDetailView;
+import com.billetterie.billetterie.entity.Place;
 import com.billetterie.billetterie.entity.Salle;
 import com.billetterie.billetterie.exception.NotFoundException;
+import com.billetterie.billetterie.exception.RessourceUtiliseeException;
 import com.billetterie.billetterie.repository.EvenementRepository;
+import com.billetterie.billetterie.repository.PlaceRepository;
+import com.billetterie.billetterie.repository.ReservationRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +27,8 @@ import java.time.LocalDateTime;
     public class EvenementService implements CrudService{
         private final EvenementRepository evenementRepository;
         private final SalleRepository salleRepository;
+        private final PlaceRepository placeRepository;
+        private final ReservationRepository reservationRepository;
 
         /**
          * Constructeur injectant les repositories des événements et des salles.
@@ -29,9 +36,11 @@ import java.time.LocalDateTime;
          * @param evenementRepository le repository des événements
          * @param salleRepository le repository des salles
          */
-        public EvenementService(EvenementRepository evenementRepository, SalleRepository salleRepository) {
+        public EvenementService(EvenementRepository evenementRepository, SalleRepository salleRepository, PlaceRepository placeRepository, ReservationRepository reservationRepository) {
             this.evenementRepository = evenementRepository;
             this.salleRepository = salleRepository;
+            this.placeRepository = placeRepository;
+            this.reservationRepository = reservationRepository;
         }
 
         /**
@@ -108,11 +117,15 @@ import java.time.LocalDateTime;
         Salle salle = salleRepository.findById(evenementRequest.getSalleId())
                 .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
         if (evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("L'horaire de l'événement ne peut pas être dans le passé");
+            throw new IllegalArgumentException(
+                    "L'horaire de l'événement ne peut pas être dans le passé");
+        }
+        if (!placeRepository.existsBySalleId(evenementRequest.getSalleId())) {
+            throw new IllegalArgumentException("Attention, la salle sélectionnée ne contient aucune place. " +
+                    "Veuillez choisir une salle avec au moins une place.");
         }
         return toDto(evenementRepository.save(toEntity(evenementRequest, salle)));
     }
-
     /**
      * Modifie un événement existant.
      *
@@ -127,8 +140,13 @@ import java.time.LocalDateTime;
                 .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
         Evenement evenement = evenementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
-        if (evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("L'horaire de l'événement ne peut pas être dans le passé");
+        boolean dateAchangee = !evenement.getHoraire().isEqual(evenementRequest.getHoraire());
+        if (dateAchangee && evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("L'horaire de l'événement ne peut pas être dans le passé");
+        }
+        boolean estReservee = evenement.getSalle().getId().equals(salle.getId());
+        if (reservationRepository.existsByEvenementId(id) && estReservee) {
+            throw new IllegalArgumentException("La nouvelle salle sélectionnée ne contient aucune place.");
         }
         evenement.setTitre(evenementRequest.getTitre());
         evenement.setDescription(evenementRequest.getDescription());
@@ -158,7 +176,9 @@ import java.time.LocalDateTime;
      * @return une page d'objets {@link ResponseDto}
      */
     public Page<ResponseDto> getAll(int page, int taille) {
-        Pageable pageable = PageRequest.of(page, taille);
+        Sort sort = Sort.by(Sort.Order.asc("horaire"));
+        Pageable pageable = PageRequest.of(page, taille,sort);
+
         return evenementRepository.findDetailViews(pageable)
                 .map(view -> toDto(view));
     }
@@ -173,6 +193,10 @@ import java.time.LocalDateTime;
     public EvenementResponseDto delete(Long id) throws Throwable{
         Object entity = evenementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        boolean evenementUtilisee = reservationRepository.existsByEvenementId(id);
+        if (reservationRepository.existsByEvenementId(id)) {
+            throw new RessourceUtiliseeException("Evenement",id,"Reservation");
+        }
         evenementRepository.deleteById(id);
         return toDto(entity);
         }

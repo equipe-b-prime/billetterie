@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PlaceRepository extends JpaRepository<Place, Long> {
 
+    // Retourne true dès qu'au moins une place est rattachée à cette salle
     boolean existsBySalleId(Long id);
 
     // long countBySalleId(Long salleId);

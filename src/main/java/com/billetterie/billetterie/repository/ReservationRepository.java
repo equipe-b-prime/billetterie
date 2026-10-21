@@ -42,4 +42,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return la page des réservations correspondant à l'événement
      */
     Page<Reservation> findByEvenementId(Long evenementId, Pageable pageable);
+
+    boolean existsByEvenementId(long id);
 }
