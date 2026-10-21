@@ -34,8 +34,6 @@ public class Reservation {
     private LocalDateTime dateAnnulation;
     @Column(name = "montant_total", nullable = false)
     private BigDecimal montantTotal;
-    @Column(name = "montant_rembourse")
-    private BigDecimal montantRembourse;
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;

@@ -1,23 +1,19 @@
 package com.billetterie.billetterie.service;
 
 import com.billetterie.billetterie.dto.*;
-import com.billetterie.billetterie.entity.Client;
-import com.billetterie.billetterie.entity.Evenement;
-import com.billetterie.billetterie.entity.Reservation;
-import com.billetterie.billetterie.entity.Statut;
+import com.billetterie.billetterie.entity.*;
 import com.billetterie.billetterie.exception.NotFoundException;
-import com.billetterie.billetterie.repository.ClientRepository;
-import com.billetterie.billetterie.repository.EvenementRepository;
-import com.billetterie.billetterie.repository.ReservationRepository;
-import com.billetterie.billetterie.repository.StatutRepository;
+import com.billetterie.billetterie.exception.RessourceUtiliseeException;
+import com.billetterie.billetterie.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 /**
  * Service métier gérant les réservations.
@@ -30,6 +26,13 @@ public class ReservationService extends AbstractCrudService {
     private final StatutRepository statutRepository;
     private final EvenementRepository evenementRepository;
     private final ClientRepository clientRepository;
+    private final CategorieRepository categorieRepository;
+    private final PlaceRepository placeRepository;
+    private final TarifEvenementRepository tarifEvenementRepository;
+    private final BilletRepository billetRepository;
+    private final PaiementRepository paiementRepository;
+
+
 
     /**
      * Constructeur injectant les repositories des réservations, des statuts, des événements et des clients.
@@ -43,12 +46,17 @@ public class ReservationService extends AbstractCrudService {
             ReservationRepository reservationRepository,
             StatutRepository statutRepository,
             EvenementRepository evenementRepository,
-            ClientRepository clientRepository) {
+            ClientRepository clientRepository, CategorieRepository categorieRepository, PlaceRepository placeRepository, TarifEvenementRepository tarifEvenementRepository, BilletRepository billetRepository, PaiementRepository paiementRepository) {
         super(reservationRepository);
         this.reservationRepository = reservationRepository;
         this.statutRepository = statutRepository;
         this.evenementRepository = evenementRepository;
         this.clientRepository = clientRepository;
+        this.categorieRepository = categorieRepository;
+        this.placeRepository = placeRepository;
+        this.tarifEvenementRepository = tarifEvenementRepository;
+        this.billetRepository = billetRepository;
+        this.paiementRepository = paiementRepository;
     }
 
     /**
@@ -67,7 +75,6 @@ public class ReservationService extends AbstractCrudService {
                 .dateAnnulation(reservationRequest.getDateAnnulation())
                 .client(client)
                 .montantTotal(reservationRequest.getMontantTotal())
-                .montantRembourse(reservationRequest.getMontantRembourse())
                 .statut(statut)
                 .evenement(evenement)
                 .build();
@@ -88,7 +95,6 @@ public class ReservationService extends AbstractCrudService {
                 .datePaiement(reservation.getDatePaiement())
                 .dateAnnulation(reservation.getDateAnnulation())
                 .montantTotal(reservation.getMontantTotal())
-                .montantRembourse(reservation.getMontantRembourse())
                 .client(ClientResponseDto.builder()
                         .id(reservation.getClient().getId())
                         .nom(reservation.getClient().getNom())
@@ -130,11 +136,27 @@ public class ReservationService extends AbstractCrudService {
         reservation.setDatePaiement(reservationRequest.getDatePaiement());
         reservation.setDateAnnulation(reservationRequest.getDateAnnulation());
         reservation.setMontantTotal(reservationRequest.getMontantTotal());
-        reservation.setMontantRembourse(reservationRequest.getMontantRembourse());
         reservation.setStatut(statut);
         reservation.setClient(client);
         reservation.setEvenement(evenement);
         return toDto(reservationRepository.save(reservation));
+    }
+    /**
+     * Récupère une page d'entités présentes dans la base de données
+     * et les convertit en DTOs de réponse.
+     * La page et la taille transmises sont normalisées par {@link CrudService}.
+     *
+     * @param page l'index de la page souhaitée
+     * @param taille le nombre d'éléments souhaités par page
+     * @return une page d'objets {@link ResponseDto}
+     */
+    public Page<ResponseDto> getAll(int page, int taille) {
+
+        Sort sort = Sort.by(Sort.Order.desc("dateCreation"));
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille),sort);
+
+        return reservationRepository.findAll(pageable)
+                .map(this::toDto);
     }
 
     /**
@@ -145,16 +167,86 @@ public class ReservationService extends AbstractCrudService {
      */
     @Override
     public ResponseDto create(RequestDto requestDto) {
-        ReservationRequestDto reservationRequest = (ReservationRequestDto) requestDto;
-        Statut statut = statutRepository.findById(reservationRequest.getStatutId())
-                .orElseThrow(() -> new NotFoundException("Statut non trouvé"));
-        Client client = clientRepository.findById(reservationRequest.getClientId())
-                .orElseThrow(() -> new NotFoundException("Client non trouvé"));
-        Evenement evenement = evenementRepository.findById(reservationRequest.getEvenementId())
-                .orElseThrow(() -> new NotFoundException("Événement non trouvé"));
-        Reservation reservation = toEntity(reservationRequest, statut, client, evenement);
+        ReservationRequestDto reservationRequestDto = (ReservationRequestDto) requestDto;
+
+        // 1. Récupération du client, de l'événement (avec verrou) et du statut
+        Client client = clientRepository.findById(reservationRequestDto.getClientId())
+                .orElseThrow(() -> new NotFoundException("Client non trouvé : " + reservationRequestDto.getClientId()));
+
+        Evenement evenement = evenementRepository.findByIdForUpdate(reservationRequestDto.getEvenementId())
+                .orElseThrow(() -> new NotFoundException("Événement non trouvé : " + reservationRequestDto.getEvenementId()));
+
+        Statut statutProvisoire = statutRepository.findByLibelle("PROVISOIRE")
+                .orElseThrow(() -> new NotFoundException("Statut PROVISOIRE non configuré"));
+
+        Long salleId = evenement.getSalle().getId();
+        BigDecimal montantTotalGlobal = BigDecimal.ZERO;
+
+        List<Place> toutesLesPlaces = new ArrayList<>();
+        Map<Place, BigDecimal> prixParPlace = new HashMap<>();
+
+        // 2. Traitement de chaque catégorie sélectionnée
+        for (LigneReservationDto ligne : reservationRequestDto.getLignes()) {
+            Categorie categorie = categorieRepository.findById(ligne.getCategorieId())
+                    .orElseThrow(() -> new NotFoundException("Catégorie non trouvée : " + ligne.getCategorieId()));
+
+            // Récupération du tarif pour ce couple (Événement + Catégorie)
+            BigDecimal prixUnitaire = tarifEvenementRepository
+                    .findPrixParEvenementEtCategorie(evenement.getId(), categorie.getId())
+                    .orElseThrow(() -> new NotFoundException("Tarif non trouvé pour la catégorie : " + categorie.getLibelle()));
+
+            // Recherche des places disponibles dans la salle
+            int quantiteDemandee = ligne.getQuantite();
+            List<Place> placesDisponibles = placeRepository.findPlacesDisponibles(
+                    salleId,
+                    evenement.getId(),
+                    categorie.getId(),
+                    PageRequest.of(0, quantiteDemandee)
+            );
+
+            // Vérification de la disponibilité
+            if (placesDisponibles.size() < quantiteDemandee) {
+                throw new IllegalStateException("Places insuffisantes pour la catégorie " + categorie.getLibelle()
+                        + ". Demandées : " + quantiteDemandee + ", Disponibles : " + placesDisponibles.size());
+            }
+
+            // Cumul du montant total
+            BigDecimal sousTotal = prixUnitaire.multiply(BigDecimal.valueOf(quantiteDemandee));
+            montantTotalGlobal = montantTotalGlobal.add(sousTotal);
+
+            // Association des places avec leur prix
+            for (Place place : placesDisponibles) {
+                toutesLesPlaces.add(place);
+                prixParPlace.put(place, prixUnitaire);
+            }
+        }
+
+        // 3. Sauvegarde de la Réservation
+        Reservation reservation = new Reservation();
+        reservation.setClient(client);
+        reservation.setEvenement(evenement);
+        reservation.setStatut(statutProvisoire);
         reservation.setDateCreation(LocalDateTime.now());
-        return toDto(reservationRepository.save(reservation));
+        reservation.setMontantTotal(montantTotalGlobal);
+
+        Reservation reservationSauvegardee = reservationRepository.save(reservation);
+
+        // 4. Création des Billets
+        List<Billet> billets = new ArrayList<>();
+        for (Place place : toutesLesPlaces) {
+            Billet billet = Billet.builder()
+                    .reservation(reservationSauvegardee)
+                    .place(place)
+                    .prixApplique(prixParPlace.get(place))
+                    .codeBillet("TKT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
+                    .build();
+
+            billets.add(billet);
+        }
+
+        billetRepository.saveAll(billets);
+
+        return toDto(reservationSauvegardee);
     }
 
 
@@ -195,5 +287,33 @@ public class ReservationService extends AbstractCrudService {
     public Page<ResponseDto> getReservationByIdEvenement(long id, int page, int taille) {
         Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille), Sort.by("id"));
         return reservationRepository.findByEvenementId(id, pageable).map(this::toDto);
+    }
+    /**
+     * Supprime une réservation de la base de données après avoir vérifié son existence et son statut.
+     * La suppression est autorisée uniquement pour les réservations en statut 'PROVISOIRE' ou 'ANNULEE'.
+     *
+     * @param id l'identifiant de la réservation à supprimer
+     * @return un objet {@link ResponseDto} contenant les données de l'entité supprimée
+     * @throws NotFoundException si la réservation n'existe pas
+     * @throws IllegalStateException si la réservation est dans un statut non supprimable (ex: PAYEE)
+     */
+    @Override
+    public ResponseDto delete(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        String statutLibelle = reservation.getStatut().getLibelle();
+        if (!("PROVISOIRE".equalsIgnoreCase(statutLibelle) ||"ANNULEE".equalsIgnoreCase(statutLibelle))) {
+            throw new IllegalArgumentException(
+                    "Impossible de supprimer la réservation  Une réservation payée ne peut pas être " +
+                            "supprimée, elle doit être annulée."
+            );
+        }
+        if (paiementRepository.existsByReservationId(id)){
+            throw new RessourceUtiliseeException("Reservation",id,"Paiement");
+        }
+
+        ResponseDto responseDto = toDto(reservation);
+        reservationRepository.delete(reservation);
+        return responseDto;
     }
 }

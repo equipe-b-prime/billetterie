@@ -17,7 +17,8 @@ public class Paiement {
 
     @Column(nullable = false)
     private BigDecimal montant;
-    @FutureOrPresent(message = "la Date  ne  doit pas etre une date dans le passé")    @Column(name = "date_paiement", nullable = false)
+    @FutureOrPresent(message = "la Date  ne  doit pas etre une date dans le passé")
+    @Column(name = "date_paiement", nullable = false)
     private LocalDateTime datePaiement;
 
     @Column(length = 50)

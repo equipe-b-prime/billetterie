@@ -24,7 +24,6 @@ public class ReservationResponseDto implements ResponseDto {
     private LocalDateTime dateAnnulation;
     private ClientResponseDto client;
     private BigDecimal montantTotal;
-    private BigDecimal montantRembourse;
     private EvenementResponseDto evenement;
     private StatutResponseDto statut;
 }

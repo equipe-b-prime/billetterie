@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * Interface marqueur pour les DTO de requête.
+ * Interface marqueur pour les DTO de requête.RequestDto
  * Permet la désérialisation polymorphe par déduction de sous-type.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)

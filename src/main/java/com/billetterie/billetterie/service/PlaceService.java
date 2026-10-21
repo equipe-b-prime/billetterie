@@ -163,7 +163,7 @@ public class PlaceService extends AbstractCrudService {
      */
     @Override
     public Page<ResponseDto> getAll(int page, int taille) {
-        Sort sort = Sort.by(Sort.Order.desc("rang"), Sort.Order.asc("numero"));
+        Sort sort = Sort.by(Sort.Order.asc("rang"), Sort.Order.asc("numero"));
         Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille),sort);
         return placeRepository.findAll(pageable)
                 .map(this::toDto);

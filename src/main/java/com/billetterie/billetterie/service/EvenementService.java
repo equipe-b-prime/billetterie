@@ -134,25 +134,40 @@ import java.time.LocalDateTime;
      * @return EvenementResponseDto Les détails de l'événement modifié.
      */
     @Override
+
     public ResponseDto update(Long id, RequestDto requestDto) {
         EvenementRequestDto evenementRequest = (EvenementRequestDto) requestDto;
-        Salle salle = salleRepository.findById(evenementRequest.getSalleId())
-                .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
+
         Evenement evenement = evenementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
-        boolean dateAchangee = !evenement.getHoraire().isEqual(evenementRequest.getHoraire());
-        if (dateAchangee && evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("L'horaire de l'événement ne peut pas être dans le passé");
+
+        Salle salle = salleRepository.findById(evenementRequest.getSalleId())
+                .orElseThrow(() -> new NotFoundException("Salle non trouvée : " + evenementRequest.getSalleId()));
+
+        // 1. Contrôle du changement de salle
+        boolean salleAChanger = !evenement.getSalle().getId().equals(salle.getId());
+        if (salleAChanger) {
+            if (reservationRepository.existsByEvenementId(id)) {
+                throw new IllegalArgumentException("Impossible de changer la salle : cet événement a déjà des réservations.");
+            }
+            if (!placeRepository.existsBySalleId(salle.getId())) {
+                throw new IllegalArgumentException("La nouvelle salle sélectionnée ne contient aucune place.");
+            }
         }
-        boolean estReservee = evenement.getSalle().getId().equals(salle.getId());
-        if (reservationRepository.existsByEvenementId(id) && estReservee) {
-            throw new IllegalArgumentException("La nouvelle salle sélectionnée ne contient aucune place.");
+
+        // 2. Contrôle de la modification de date (doit rester dans le futur)
+        boolean dateAChangee = !evenement.getHoraire().isEqual(evenementRequest.getHoraire());
+        if (dateAChangee && evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("L'horaire de l'événement ne peut pas être dans le passé.");
         }
+
+        // 3. Mise à jour des valeurs
         evenement.setTitre(evenementRequest.getTitre());
         evenement.setDescription(evenementRequest.getDescription());
         evenement.setHoraire(evenementRequest.getHoraire());
         evenement.setPlacementLibre(evenementRequest.getPlacementLibre());
         evenement.setSalle(salle);
+
         return toDto(evenementRepository.save(evenement));
     }
     /**
