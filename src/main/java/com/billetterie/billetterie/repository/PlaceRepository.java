@@ -1,6 +1,8 @@
 package com.billetterie.billetterie.repository;
 
 import com.billetterie.billetterie.entity.Place;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,5 +29,11 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
             " p.numero = :numero and p.id <> :placeId)", nativeQuery = true)
     boolean existsBySalleIdAndRangAndNumeroAndIdNot(@Param("salleId") Long salleId, @Param("rang") int rang ,
                                                     @Param("numero") int numero, @Param("placeId") Long placeId);
+
+    // Requête JPQL personnalisée avec tri sur le rang puis le numéro
+    @Query("SELECT p FROM Place p ORDER BY p.rang ASC, p.numero ASC")
+    Page<Place> findAllSortedByRangAndNumero(Pageable pageable);
+
+    boolean existsByRangAndNumeroAndSalleIdAndIdNot(int rang, int numero, Long salleId, Long placeId);
 
 }

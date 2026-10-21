@@ -6,6 +6,7 @@ import com.billetterie.billetterie.entity.Place;
 import com.billetterie.billetterie.entity.Salle;
 import com.billetterie.billetterie.exception.DoublonRessourceException;
 import com.billetterie.billetterie.exception.NotFoundException;
+import com.billetterie.billetterie.repository.BilletRepository;
 import com.billetterie.billetterie.repository.CategorieRepository;
 import com.billetterie.billetterie.repository.PlaceRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
@@ -13,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,7 +26,7 @@ public class PlaceService extends AbstractCrudService {
     private final PlaceRepository placeRepository;
     private final SalleRepository salleRepository;
     private final CategorieRepository categorieRepository;
-
+    private final BilletRepository billetRepository;
     /**
      * Constructeur injectant les repositories des places, des salles et des catégories.
      *
@@ -32,11 +34,12 @@ public class PlaceService extends AbstractCrudService {
      * @param salleRepository le repository des salles
      * @param categorieRepository le repository des catégories
      */
-    public PlaceService(PlaceRepository placeRepository, SalleRepository salleRepository, CategorieRepository categorieRepository) {
+    public PlaceService(PlaceRepository placeRepository, SalleRepository salleRepository, CategorieRepository categorieRepository, BilletRepository billetRepository) {
         super(placeRepository);
         this.placeRepository = placeRepository;
         this.salleRepository = salleRepository;
         this.categorieRepository = categorieRepository;
+        this.billetRepository = billetRepository;
     }
 
     /**
@@ -90,7 +93,6 @@ public class PlaceService extends AbstractCrudService {
      * @param requestDto Les données de la requête pour créer la place.
      * @return PlaceResponseDto Les détails de la place créée.
      */
-    @Transactional
     @Override
     public PlaceResponseDto create(RequestDto requestDto) {
         PlaceRequestDto placeRequest = (PlaceRequestDto) requestDto;
@@ -108,7 +110,6 @@ public class PlaceService extends AbstractCrudService {
             throw new IllegalArgumentException("La salle est pleine, impossible d'ajouter une nouvelle place.");
         }
         return toDto(placeRepository.save(place));
-
     }
 
     /**
@@ -131,6 +132,18 @@ public class PlaceService extends AbstractCrudService {
                 placeRequest.getNumero(), id)) {
             throw new DoublonRessourceException("Une place avec le même rang et numéro existe déjà dans cette salle.");
         }
+        boolean estPleine = placeRepository.countBySalleId(placeRequest.getSalleId()) > salle.getCapacite();
+        if (estPleine) {
+            throw new IllegalArgumentException(" La salle est pleine, impossible de modifier la place.");
+        }
+        boolean rangOunumeroEstModifiee = place.getRang() != placeRequest.getRang()
+                || place.getNumero() != placeRequest.getNumero();
+        if (billetRepository.existsByPlaceId(id) && rangOunumeroEstModifiee ){
+            throw new IllegalArgumentException("Impossible de modifier le rang ou le numéro d'une place qui a déjà été réservée.");
+        }
+        if (placeRepository.existsByRangAndNumeroAndSalleIdAndIdNot(placeRequest.getRang(), placeRequest.getNumero(), id, id)) {
+            throw new DoublonRessourceException("Une place avec le même rang et numéro existe déjà dans cette salle.");
+        }
         place.setNumero(placeRequest.getNumero());
         place.setRang(placeRequest.getRang());
         place.setSalle(salle);
@@ -149,8 +162,26 @@ public class PlaceService extends AbstractCrudService {
      */
     @Override
     public Page<ResponseDto> getAll(int page, int taille) {
-        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
+        Sort sort = Sort.by(Sort.Order.asc("rang"), Sort.Order.asc("numero"));
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille),sort);
         return placeRepository.findAll(pageable)
                 .map(this::toDto);
+    }
+    /**
+     * Supprime une entité de la base de données après avoir vérifié son existence,
+     * puis retourne les informations de l'entité supprimée.
+     *
+     * @param id l'identifiant de l'entité à supprimer
+     * @return un objet {@link ResponseDto} contenant les données de l'entité tout juste supprimée
+     * @throws NotFoundException si l'entité à supprimer n'existe pas
+     */
+    public ResponseDto delete(Long id) throws Throwable{
+        Object entity = placeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        if(billetRepository.existsByPlaceId(id)){
+            throw new IllegalArgumentException("Impossible de supprimer une place qui a déjà été réservée.");
+        }
+        placeRepository.deleteById(id);
+        return toDto(entity);
     }
 }

@@ -114,7 +114,8 @@ public class SalleService extends AbstractCrudService {
         }
         if (salleRequest.getCapacite() < placeRepository.countBySalleId(id) ) {
           throw new IllegalArgumentException("La capacité (" + salleRequest.getCapacite() + ") ne peut pas être" +
-                  " inférieure au nombre de places déjà enregistrées (" + placeRepository.countBySalleId(id)  + ").");        }
+                  " inférieure au nombre de places déjà enregistrées (" + placeRepository.countBySalleId(id)  + ").");
+        }
         salle.setNom(salleRequest.getNom());
         salle.setVille(salleRequest.getVille());
         salle.setCapacite(salleRequest.getCapacite());
