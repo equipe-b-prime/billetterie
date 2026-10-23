@@ -1,5 +1,6 @@
 package com.billetterie.billetterie.repository;
 
+import com.billetterie.billetterie.entity.Client;
 import com.billetterie.billetterie.entity.Evenement;
 import com.billetterie.billetterie.entity.EvenementDetailView;
 import jakarta.persistence.LockModeType;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,10 +49,15 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
      * @param pageable les paramètres de pagination
      * @return la page des détails d'événements
      */
-    @Query(value = "SELECT v FROM EvenementDetailView v",
-           countQuery = "SELECT count(v) FROM EvenementDetailView v")
-    Page<EvenementDetailView> findDetailViews(Pageable pageable);
+    @Query("SELECT e FROM Evenement e")
+    Page<Evenement> findDetailViews(Pageable pageable);
 
     boolean existsBySalleId(Long id);
 
+    List<Evenement> findBySalleId(Long salleId);
+
+    @Query("SELECT e FROM Evenement e WHERE e.horaire between :dateDebut AND :dateFin ORDER BY e.horaire ASC")
+    Page<Evenement> findByHoraireBetweenOrderByHoraireAsc(@Param("dateDebut") LocalDateTime dateDebut,
+                                                                             @Param("dateFin") LocalDateTime dateFin, Pageable pageable
+    );
 }

@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Service métier gérant les événements.
@@ -88,6 +89,20 @@ import java.time.LocalDateTime;
                             .build())
                     .build();
         }
+    /**
+     * Convertit spécifiquement l'entité de sans menbtionner les information de le a salle auquel il est affecte.
+     * @param evenement l'entite a transfomer.
+     * @return EvenementResponseDto le Dto de retour.
+     */
+        public  EvenementResponseDto toDtoSansSalle(Evenement evenement) {
+            return EvenementResponseDto.builder()
+                    .id(evenement.getId())
+                    .titre(evenement.getTitre())
+                    .description(evenement.getDescription())
+                    .horaire(evenement.getHoraire())
+                    .placementLibre(evenement.getPlacementLibre())
+                    .build();
+        }
         /**
          * Convertit les données d'une requête en entité événement.
          *
@@ -144,7 +159,6 @@ import java.time.LocalDateTime;
         Salle salle = salleRepository.findById(evenementRequest.getSalleId())
                 .orElseThrow(() -> new NotFoundException("Salle non trouvée : " + evenementRequest.getSalleId()));
 
-        // 1. Contrôle du changement de salle
         boolean salleAChanger = !evenement.getSalle().getId().equals(salle.getId());
         if (salleAChanger) {
             if (reservationRepository.existsByEvenementId(id)) {
@@ -155,7 +169,6 @@ import java.time.LocalDateTime;
             }
         }
 
-        // 2. Contrôle de la modification de date (doit rester dans le futur)
         boolean dateAChangee = !evenement.getHoraire().isEqual(evenementRequest.getHoraire());
         if (dateAChangee && evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("L'horaire de l'événement ne peut pas être dans le passé.");
@@ -190,10 +203,8 @@ import java.time.LocalDateTime;
      * @param taille le nombre d'éléments souhaités par page
      * @return une page d'objets {@link ResponseDto}
      */
-    public Page<ResponseDto> getAll(int page, int taille) {
-        Sort sort = Sort.by(Sort.Order.asc("horaire"));
-        Pageable pageable = PageRequest.of(page, taille,sort);
-
+    public Page<EvenementResponseDto> getAll(int page, int taille) {
+        Pageable pageable = PageRequest.of(page, taille);
         return evenementRepository.findDetailViews(pageable)
                 .map(view -> toDto(view));
     }
@@ -202,17 +213,31 @@ import java.time.LocalDateTime;
      * Supprime un événement à partir de son identifiant.
      *
      * @param id l'identifiant de l'événement à supprimer
-     * @return EvenementResponseDto Les détails de l'événement supprimé.
+     * @return EvenementResponseD        // 1. Contrôle du changement de salle
+to Les détails de l'événement supprimé.
      * @throws NotFoundException si l'événement n'existe pas
      */
     public EvenementResponseDto delete(Long id) throws Throwable{
-        Object entity = evenementRepository.findById(id)
+        Evenement evenement = evenementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
         boolean evenementUtilisee = reservationRepository.existsByEvenementId(id);
         if (reservationRepository.existsByEvenementId(id)) {
             throw new RessourceUtiliseeException("Evenement",id,"Reservation");
         }
         evenementRepository.deleteById(id);
-        return toDto(entity);
+        return toDto(evenement);
         }
+
+    public Page<EvenementResponseDto> findByHoraireBetweenOrderByHoraireAsc(LocalDateTime du, LocalDateTime au,int page,int taille) {
+        Pageable pageable = PageRequest.of(page, taille);
+        Page<Evenement> evenements = evenementRepository.findByHoraireBetweenOrderByHoraireAsc(du, au,pageable);
+        return evenements.map(this::toDto);
+    }
+    public Page<EvenementResponseDto> getEvenements(int page, int taille, LocalDateTime du, LocalDateTime au) {
+        if (du != null && au != null) {
+           return findByHoraireBetweenOrderByHoraireAsc(du,au,page,taille) ;
+        } else {
+            return  getAll(page,taille);
+        }
+    }
 }

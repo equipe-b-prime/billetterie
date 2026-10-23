@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
  * Contrôleur REST exposant les endpoints de gestion des places.
  */
 @RestController
-@RequestMapping("/place")
+@RequestMapping("/places")
 public class PlaceController {
 
     private final PlaceService placeService;
@@ -83,4 +83,5 @@ public class PlaceController {
     public Response<ResponseDto> delete(@PathVariable Long id) throws Throwable {
         return new Response<>(placeService.delete(id));
     }
+
 }

@@ -1,5 +1,6 @@
 package com.billetterie.billetterie.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 /**
@@ -10,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PlaceResponseDto implements ResponseDto {
     private Long id;
     private int rang;

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
  * Contrôleur REST exposant les endpoints de gestion des réservations.
  */
 @RestController
-@RequestMapping("/reservation")
+@RequestMapping("/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;

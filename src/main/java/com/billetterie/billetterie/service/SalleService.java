@@ -4,7 +4,7 @@ import com.billetterie.billetterie.dto.RequestDto;
 import com.billetterie.billetterie.dto.ResponseDto;
 import com.billetterie.billetterie.dto.SalleRequestDto;
 import com.billetterie.billetterie.dto.SalleResponseDto;
-import com.billetterie.billetterie.entity.Categorie;
+import com.billetterie.billetterie.entity.Evenement;
 import com.billetterie.billetterie.entity.Place;
 import com.billetterie.billetterie.entity.Salle;
 import com.billetterie.billetterie.exception.DoublonRessourceException;
@@ -13,7 +13,6 @@ import com.billetterie.billetterie.exception.RessourceUtiliseeException;
 import com.billetterie.billetterie.repository.EvenementRepository;
 import com.billetterie.billetterie.repository.PlaceRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
-import org.hibernate.annotations.DialectOverride;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +26,8 @@ public class SalleService extends AbstractCrudService {
     private final SalleRepository salleRepository;
     private final EvenementRepository evenementRepository;
     private final PlaceRepository placeRepository;
+    private final PlaceService placeService;
+    private final EvenementService evenementService;
 
 
     /**
@@ -34,11 +35,13 @@ public class SalleService extends AbstractCrudService {
      *
      * @param salleRepository le repository des salles
      */
-    public SalleService(SalleRepository salleRepository, EvenementRepository evenementRepository, PlaceRepository placeRepository) {
+    public SalleService(SalleRepository salleRepository, EvenementRepository evenementRepository, PlaceRepository placeRepository, PlaceService placeService, EvenementService evenementService) {
         super(salleRepository);
         this.salleRepository = salleRepository;
         this.evenementRepository = evenementRepository;
         this.placeRepository = placeRepository;
+        this.placeService = placeService;
+        this.evenementService = evenementService;
     }
 
     /**
@@ -75,6 +78,7 @@ public class SalleService extends AbstractCrudService {
                 .nbplaceOccupee(totalPlacesEnregistrees)
                 .build();
     }
+
 
     /**
      * Crée une nouvelle salle.
@@ -152,4 +156,49 @@ public class SalleService extends AbstractCrudService {
         salleRepository.deleteById(id);
         return toDto(entity);
     }
+
+    /**
+     *
+     * @param id
+     * @return un objet {@link ResponseDto} contenant les données de l'entité tout juste supprimée
+     */
+    public List<ResponseDto> findBySalleIdOrderByRangAscNumeroAsc(Long id) {
+        if (!salleRepository.existsById(id)) {
+            throw new NotFoundException("Salle non trouvée avec l'id : " + id);
+        }
+
+        return placeRepository.findBySalleIdOrderByRangAscNumeroAsc(id)
+                .stream()
+                .map(placeService::toDtoSansSalle)
+                .map(dto -> (ResponseDto) dto)
+                .toList();
+    }
+
+    public List<ResponseDto> getPlacesBySalle(Long id,String libelle) {
+        List<Place> places = placeRepository.findBySalleIdAndCategorieLibelleIgnoreCase(id, libelle);
+        if (places.isEmpty()) {
+            if (!salleRepository.existsById(id)) {
+                throw new NotFoundException("Salle non trouvée avec l'id : " + id);
+            }
+            throw new NotFoundException("Aucune place trouvée pour la salle " + id + " avec la catégorie : " + libelle);
+        }
+        return places.stream()
+                .map(placeService::toDtoSansSalle)
+                .map(dto -> (ResponseDto) dto)
+                .toList();
+
+    }
+
+    public List<ResponseDto> getEvenementsBySalleId(Long id) {
+        List<Evenement> evenements = evenementRepository.findBySalleId(id);
+        if (!salleRepository.existsById(id)) {
+            throw new NotFoundException("Salle non trouvée avec l'id : " + id);
+        }
+
+        return evenements.stream()
+                .map(evenementService :: toDtoSansSalle)
+                .map(dto -> (ResponseDto) dto)
+                .toList();
+        }
 }
+

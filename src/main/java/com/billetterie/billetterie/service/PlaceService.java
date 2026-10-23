@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Service métier gérant les places.
  * Fournit la création, la modification, la suppression et les conversions entité/DTO.
@@ -80,6 +82,18 @@ public class PlaceService extends AbstractCrudService {
                         .ville(place.getSalle().getVille())
                         .adresse(place.getSalle().getAdresse())
                         .build())
+                .categorie(CategorieResponseDto.builder()
+                        .id(place.getCategorie().getId())
+                        .nom(place.getCategorie().getLibelle())
+                        .description(place.getCategorie().getDescription())
+                        .build())
+                .build();
+    }
+    public PlaceResponseDto toDtoSansSalle(Place place) {
+        return PlaceResponseDto.builder()
+                .id(place.getId())
+                .rang(place.getRang())
+                .numero(place.getNumero())
                 .categorie(CategorieResponseDto.builder()
                         .id(place.getCategorie().getId())
                         .nom(place.getCategorie().getLibelle())
@@ -185,4 +199,6 @@ public class PlaceService extends AbstractCrudService {
         placeRepository.deleteById(id);
         return toDto(entity);
     }
+
+
 }

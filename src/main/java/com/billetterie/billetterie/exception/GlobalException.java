@@ -55,7 +55,7 @@ public class GlobalException {
         Response<String> reponse = new Response<>(Collections.emptyList());
         reponse.setNombre(0L);
         reponse.setHasError(true);
-        reponse.setStatus(new Status(HttpStatus.NOT_FOUND.value(), "Ressource non trouvée : " + ex.getMessage()));
+        reponse.setStatus(new Status(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(reponse);
     }
 
@@ -63,25 +63,37 @@ public class GlobalException {
      * Gère les erreurs où paramètre envoyé dans une requête ne corresponde pas
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Response<List<String>> > MethodArgumentTypeMismatchException (MethodArgumentTypeMismatchException ex) {
-        String typeAtendu = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "inconnu";
-        switch (typeAtendu) {
+    public ResponseEntity<Response<List<String>>> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String typeBrut = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "";
+        String typeAtendu;
+
+        switch (typeBrut) {
             case "int", "Long", "Integer" ->
-                typeAtendu = "entier";
+                    typeAtendu = "entier";
             case "boolean", "Boolean" ->
-                typeAtendu = "booléen";
+                    typeAtendu = "booléen";
             case "String" ->
-                typeAtendu = "chaîne de caractères";
+                    typeAtendu = "chaîne de caractères";
+            case "LocalDateTime" ->
+                    typeAtendu = "date et heure au format 'dd-MM-yyyy HH:mm:ss'";
             default ->
-                typeAtendu = "inconnu";
+                    typeAtendu = typeBrut.isEmpty() ? "valide" : typeBrut;
         }
+
         Response<List<String>> response = new Response<>(Collections.emptyList());
         response.setData(null);
-        response.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), "Le parametre '" + ex.getName() + "' doit etre de type "+typeAtendu));
+        response.setStatus(new Status(
+                HttpStatus.BAD_REQUEST.value(),
+                "Le parametre '" + ex.getName() + "' doit etre de type " + typeAtendu
+        ));
         response.setHasError(true);
         response.setNombre(0L);
+
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+    /**
+     * Gère les erreurs où on a un cas de doublon de ressource
+     */
     @ExceptionHandler(DoublonRessourceException.class)
     public ResponseEntity<Response<String>> doublonRessourceException(DoublonRessourceException ex) {
         Response<String> reponse = new Response<>(Collections.emptyList());
@@ -90,6 +102,9 @@ public class GlobalException {
         reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), "Doublon de ressource : " + ex.getMessage()));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
     }
+    /**
+     * Gère les erreurs où on a un cas de ressource utilisée par une autre ressource
+     */
     @ExceptionHandler(RessourceUtiliseeException.class)
     public ResponseEntity<Response<String>> ressourceUtiliseeException(RessourceUtiliseeException ex) {
         Response<String> reponse = new Response<>(Collections.emptyList());
@@ -98,6 +113,12 @@ public class GlobalException {
         reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), ex.getMessage()));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
     }
+
+    /**
+     * Gère les erreurs où on a un cas de ressource utilisée par une autre ressource
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Response<String>> illegalArgumentException(IllegalArgumentException ex) {
         Response<String> reponse = new Response<>(Collections.emptyList());

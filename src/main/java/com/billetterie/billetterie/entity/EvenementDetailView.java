@@ -24,7 +24,6 @@ public class EvenementDetailView {
 
     @Id
     private Long id;
-
     private String titre;
     private String description;
     private LocalDateTime horaire;

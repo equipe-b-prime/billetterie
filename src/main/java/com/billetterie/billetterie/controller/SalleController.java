@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
  * Contrôleur REST exposant les endpoints de gestion des salles.
  */
 @RestController
-@RequestMapping("/salle")
+@RequestMapping("/salles")
 public class SalleController {
 
     private final SalleService salleService;
@@ -24,7 +24,6 @@ public class SalleController {
     public SalleController(SalleService salleService) {
         this.salleService = salleService;
     }
-
     /**
      * Récupère la liste de toutes les salles.
      *
@@ -96,4 +95,29 @@ public class SalleController {
     public Response<ResponseDto> getByNom(@RequestParam String nom) throws Throwable {
         return new Response<>(salleService.getByNom(nom));
     }
+
+//    @GetMapping("/{id}/places")
+//    public Response<ResponseDto> findBySalleIdOrderByRangAscNumeroAsc(@PathVariable  Long id){
+//        return  new Response<>(salleService.findBySalleIdOrderByRangAscNumeroAsc(id));
+//    }
+//    @GetMapping("/{id}/places")
+//    public Response<ResponseDto> findBySalleIdAndCategorieLibelle(@PathVariable Long id,@RequestParam(name= "categorie")
+//    String libelle){
+//        return  new Response<>(salleService.findBySalleIdAndCategorieLibelle(id,libelle));
+//    }
+    @GetMapping("/{id}/places")
+    public Response<ResponseDto> getPlacesBySalle(
+            @PathVariable Long id,
+            @RequestParam(name = "categorie", required = false) String categorie) {
+        if (categorie != null && !categorie.isBlank()) {
+            return new Response<>(salleService.getPlacesBySalle(id, categorie));
+        }
+        return new Response<>(salleService.findBySalleIdOrderByRangAscNumeroAsc(id));
+    }
+
+    @GetMapping("/{id}/evenements")
+    private Response<ResponseDto> getEvenementsBySalle(@PathVariable Long id) {
+        return new Response<>(salleService.getEvenementsBySalleId(id));
+    }
+
 }

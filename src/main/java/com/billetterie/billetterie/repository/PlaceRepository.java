@@ -50,4 +50,8 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
     Page<Place> findAllSortedByRangAndNumero(Pageable pageable);
 
     boolean existsByRangAndNumeroAndSalleIdAndIdNot(int rang, int numero, Long salleId, Long placeId);
+
+    List<Place> findBySalleIdOrderByRangAscNumeroAsc(Long salleId);
+    List<Place> findBySalleIdAndCategorieLibelleIgnoreCase(Long salleId, String libelle);
+
 }

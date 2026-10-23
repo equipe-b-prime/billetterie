@@ -1,17 +1,22 @@
 package com.billetterie.billetterie.controller;
 
 import com.billetterie.billetterie.dto.EvenementRequestDto;
+import com.billetterie.billetterie.dto.EvenementResponseDto;
 import com.billetterie.billetterie.dto.ResponseDto;
 import com.billetterie.billetterie.service.EvenementService;
 import com.billetterie.billetterie.utils.response.Response;
 import jakarta.validation.Valid;
+import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * Contrôleur REST exposant les endpoints de gestion des événements.
  */
 @RestController
-@RequestMapping("/evenement")
+@RequestMapping("/evenements")
 public class EvenementController {
     private final EvenementService evenementService;
 
@@ -31,12 +36,11 @@ public class EvenementController {
      * @param taille le nombre d'éléments par page (10 par défaut, borné à 100)
      * @return Response<ResponseDto> La page des événements encapsulée.
      */
-    @GetMapping
-    public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10") int taille) {
+    @GetMapping("/ok")
+    public Response<EvenementResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
+                                                 @RequestParam(defaultValue = "10") int taille) {
         return new Response<>(evenementService.getAll(page, taille).getContent());
     }
-
     /**
      * Récupère un événement à partir de son identifiant.
      *
@@ -59,7 +63,6 @@ public class EvenementController {
     public Response<ResponseDto> create(@Valid @RequestBody EvenementRequestDto evenementRequest) {
         return new Response<>(evenementService.create(evenementRequest));
     }
-
     /**
      * Modifie un événement existant.
      *
@@ -72,7 +75,6 @@ public class EvenementController {
                                         @Valid @RequestBody EvenementRequestDto evenementRequest) {
         return new Response<>(evenementService.update(id, evenementRequest));
     }
-
     /**
      * Supprime un événement à partir de son identifiant.
      *
@@ -84,4 +86,23 @@ public class EvenementController {
     public Response<ResponseDto> delete(@PathVariable Long id) throws Throwable {
         return new Response<>(evenementService.delete(id));
     }
+
+    @GetMapping("/recherche")
+    public Response<EvenementResponseDto> findByHoraireBetweenOrderByHoraireAsc(
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime du,
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au,
+            @RequestParam (defaultValue = "0") int page,
+            @RequestParam (defaultValue = "10") int taille) {
+        return new Response<>(evenementService.findByHoraireBetweenOrderByHoraireAsc(du, au,page,taille).getContent());
+    }
+
+    @GetMapping
+    public Response<EvenementResponseDto> getEvenements(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int taille,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime du,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au) {
+        return new Response<>(evenementService.getEvenements(page, taille, du, au).getContent());
+    }
 }
+

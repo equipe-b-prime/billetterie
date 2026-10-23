@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
  * Contrôleur REST exposant les endpoints de gestion des catégories.
  */
 @RestController
-@RequestMapping("/categorie")
+@RequestMapping("/categories")
 public class CategorieController {
     private final CategorieService categorieService;
 
