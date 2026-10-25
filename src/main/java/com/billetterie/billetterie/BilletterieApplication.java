@@ -2,11 +2,13 @@ package com.billetterie.billetterie;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Point d'entrée de l'application Billetterie.
  */
 @SpringBootApplication
+@EnableScheduling
 public class BilletterieApplication {
 
 	/**

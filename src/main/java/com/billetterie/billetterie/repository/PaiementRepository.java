@@ -15,5 +15,6 @@ public interface PaiementRepository extends JpaRepository<Paiement, Long> {
 
 
     boolean existsByReservationId(long id);
+    Optional<Paiement>findByReservationId(Long id);
 }
 

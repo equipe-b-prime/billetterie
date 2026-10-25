@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -49,4 +50,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("select r from Reservation r where Lower(r.client.email) = Lower(:email)")
     Page<Reservation> findReservationByEmailClient(@Param("email") String email,Pageable pageable);
+
+//    @Query("update Reservation r set r.statut.id = 2 where r.statut.id = 1")
+//    Reservation passerDeProvisoreApaye ()
+
+    @Query("select r from Reservation r where r.statut.libelle = 'PROVISOIRE' and r.dateCreation <= :dateLimite ")
+    List<Reservation> findReservationExpirées(@Param("dateLimite") LocalDateTime dateLimite);
 }

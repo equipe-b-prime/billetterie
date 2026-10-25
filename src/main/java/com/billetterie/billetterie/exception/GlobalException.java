@@ -126,5 +126,19 @@ public class GlobalException {
         reponse.setHasError(true);
         reponse.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(reponse);
+    }/**
+     * Gère les erreurs où on a un cas de ressource utilisée par une autre ressource
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Response<String>> IllegalStateException(IllegalStateException ex) {
+        Response<String> reponse = new Response<>(Collections.emptyList());
+        reponse.setNombre(0L);
+        reponse.setHasError(true);
+        reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT
+
+        ).body(reponse);
     }
 }

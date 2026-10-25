@@ -43,4 +43,6 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "statut_id")
     private Statut statut;
+    private Boolean estRembourse;
+
 }

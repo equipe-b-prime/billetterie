@@ -152,4 +152,14 @@ public class ReservationController {
     public Response<ResponseDto> getClientStats(@PathVariable long clientId) {
         return new Response<>(clientStatsService.getClientStats(clientId));
     }
+    @PostMapping("/{id}/paiement")
+    public Response<ResponseDto> passerDeProvisoreApaye(@PathVariable Long id) throws Throwable {
+        return new Response<>(reservationService.passerDeProvisoreApaye(id));
+    }
+
+    @PostMapping("{id}/annulation")
+    public String  annulerReservation(@PathVariable Long id) throws Throwable {
+        return reservationService.annulerReservation(id);
+    }
+
 }

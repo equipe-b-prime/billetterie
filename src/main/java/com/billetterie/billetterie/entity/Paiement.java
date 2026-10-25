@@ -5,6 +5,8 @@ import jakarta.validation.constraints.FutureOrPresent;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+
 /**
  * Représente le paiement d'une reservation
  */
@@ -27,4 +29,8 @@ public class Paiement {
     @ManyToOne
     @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
+
+    public BigDecimal getMontant() {
+        return montant;
+    }
 }

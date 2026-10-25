@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class Remboursement {
 
     @Id
@@ -24,11 +25,6 @@ public class Remboursement {
 
     @Column(name = "date_remboursement", nullable = false)
     private LocalDateTime dateRemboursement;
-
-    @Column(name = "mode_remboursement")
-    private String modeRemboursement; // Ex: Wave, Orange Money, Carte, Espèces
-
-    private String motif; // Ex: "Annulation partielle de 1 billet VIP"
 
     @ManyToOne
     @JoinColumn(name = "reservation_id", nullable = false)
