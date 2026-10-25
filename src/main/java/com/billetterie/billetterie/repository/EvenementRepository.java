@@ -60,4 +60,9 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
     Page<Evenement> findByHoraireBetweenOrderByHoraireAsc(@Param("dateDebut") LocalDateTime dateDebut,
                                                                              @Param("dateFin") LocalDateTime dateFin, Pageable pageable
     );
+    @Query("SELECT MIN(e.horaire) FROM Evenement e")
+    LocalDateTime findPremiereDate();
+
+    @Query("SELECT MAX(e.horaire) FROM Evenement e")
+    LocalDateTime findDerniereDate();
 }

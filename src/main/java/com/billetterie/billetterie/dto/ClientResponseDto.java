@@ -15,4 +15,5 @@ public class ClientResponseDto {
     private String nom;
     private String prenom;
     private String telephone;
+    private String email;
 }

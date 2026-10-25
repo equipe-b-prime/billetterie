@@ -33,13 +33,13 @@ public class EvenementController {
      * Récupère une page d'événements.
      *
      * @param page l'index de la page souhaitée (0 par défaut)
-     * @param taille le nombre d'éléments par page (10 par défaut, borné à 100)
+     * @param size le nombre d'éléments par page (10 par défaut, borné à 100)
      * @return Response<ResponseDto> La page des événements encapsulée.
      */
     @GetMapping("/ok")
     public Response<EvenementResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
-                                                 @RequestParam(defaultValue = "10") int taille) {
-        return new Response<>(evenementService.getAll(page, taille).getContent());
+                                                 @RequestParam(defaultValue = "10") int size) {
+        return new Response<>(evenementService.getAll(page, size).getContent());
     }
     /**
      * Récupère un événement à partir de son identifiant.
@@ -92,17 +92,17 @@ public class EvenementController {
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime du,
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au,
             @RequestParam (defaultValue = "0") int page,
-            @RequestParam (defaultValue = "10") int taille) {
-        return new Response<>(evenementService.findByHoraireBetweenOrderByHoraireAsc(du, au,page,taille).getContent());
+            @RequestParam (defaultValue = "10") int size) {
+        return new Response<>(evenementService.findByHoraireBetweenOrderByHoraireAsc(du, au,page,size).getContent());
     }
 
     @GetMapping
     public Response<EvenementResponseDto> getEvenements(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int taille,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime du,
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au) {
-        return new Response<>(evenementService.getEvenements(page, taille, du, au).getContent());
+        return new Response<>(evenementService.getEvenements(page, size, du, au).getContent());
     }
 }
 

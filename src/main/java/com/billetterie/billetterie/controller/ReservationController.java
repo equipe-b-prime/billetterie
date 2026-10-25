@@ -38,8 +38,10 @@ public class ReservationController {
      */
     @GetMapping
     public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10")int taille) {
-        return new Response<>(reservationService.getAll(page,taille).getContent());
+                                        @RequestParam(defaultValue = "20")int size,
+                                        @RequestParam(required = false) String email
+    ) {
+        return new Response<>(reservationService.getAll(email,page,size));
     }
     /**
      * Récupère une réservation à partir de son identifiant.
@@ -94,15 +96,15 @@ public class ReservationController {
      *
      * @param clientId l'identifiant du client dont on veut les réservations
      * @param page l'index de la page souhaitée (0 par défaut)
-     * @param taille le nombre d'éléments par page (10 par défaut, borné à 100)
+     * @param size le nombre d'éléments par page (10 par défaut, borné à 100)
      * @return Response<ResponseDto> La page des réservations du client encapsulée.
      * @throws Throwable si aucune réservation ne correspond à ce client.
      */
     @GetMapping("/client")
     public Response<ResponseDto> getReservationByIdClient(@RequestParam long clientId,
                                                           @RequestParam(defaultValue = "0") int page,
-                                                          @RequestParam(defaultValue = "10") int taille) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdClient(clientId, page, taille).getContent());
+                                                          @RequestParam(defaultValue = "10") int size) throws Throwable {
+        return new Response<>(reservationService.getReservationByIdClient(clientId, page, size).getContent());
     }
 
     /**
@@ -110,31 +112,31 @@ public class ReservationController {
      *
      * @param statutId l'identifiant du statut recherché
      * @param page l'index de la page souhaitée (0 par défaut)
-     * @param taille le nombre d'éléments par page (10 par défaut, borné à 100)
+     * @param size le nombre d'éléments par page (10 par défaut, borné à 100)
      * @return Response<ResponseDto> La page des réservations correspondant au statut encapsulée.
      * @throws Throwable si aucune réservation ne correspond à ce statut.
      */
     @GetMapping("/statut/{statutId}")
     public Response<ResponseDto> getReservationByIdStatut(@PathVariable long statutId,
                                                           @RequestParam(defaultValue = "0") int page,
-                                                          @RequestParam(defaultValue = "10") int taille) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdStatut(statutId, page, taille).getContent());
+                                                          @RequestParam(defaultValue = "10") int size) throws Throwable {
+        return new Response<>(reservationService.getReservationByIdStatut(statutId, page, size).getContent());
     }
 
     /**
-     * Récupère une page des réservations d'un événement à partir de l'identifiant de cet événement.
+     * Récupère une page des réserrvations d'un événement à partir de l'identifiant de cet événement.
      *
      * @param id l'identifiant de l'événement recherché
      * @param page l'index de la page souhaitée (0 par défaut)
-     * @param taille le nombre d'éléments par page (10 par défaut, borné à 100)
+     * @param size le nombre d'éléments par page (10 par défaut, borné à 100)
      * @return Response<ResponseDto> La page des réservations correspondant à l'événement encapsulée.
      * @throws Throwable si aucune réservation ne correspond à cet événement.
      */
     @GetMapping("/evenement/{id}")
     public Response<ResponseDto> getReservationByIdEvenement(@PathVariable long id,
                                                              @RequestParam(defaultValue = "0") int page,
-                                                             @RequestParam(defaultValue = "10") int taille) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdEvenement(id, page, taille).getContent());
+                                                             @RequestParam(defaultValue = "10") int size) throws Throwable {
+        return new Response<>(reservationService.getReservationByIdEvenement(id, page, size).getContent());
     }
 
     /**

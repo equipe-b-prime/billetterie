@@ -175,12 +175,25 @@ public class PlaceService extends AbstractCrudService {
      * @param taille le nombre d'éléments souhaités par page
      * @return une page d'objets {@link ResponseDto}
      */
-    @Override
     public Page<ResponseDto> getAll(int page, int taille) {
         Sort sort = Sort.by(Sort.Order.asc("rang"), Sort.Order.asc("numero"));
         Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille),sort);
         return placeRepository.findAll(pageable)
                 .map(this::toDto);
+    }
+
+    /**
+     * Recherche une entité spécifique par son identifiant et la convertit en DTO.
+     *
+     * @param id l'identifiant unique de l'entité recherchée
+     * @return un objet {@link ResponseDto} représentant l'entité trouvée
+     * @throws NotFoundException si aucune entité ne correspond à cet identifiant
+     */
+
+    public ResponseDto getById(Long id) throws Throwable {
+        Object entity = placeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        return toDto(entity);
     }
     /**
      * Supprime une entité de la base de données après avoir vérifié son existence,
@@ -199,6 +212,7 @@ public class PlaceService extends AbstractCrudService {
         placeRepository.deleteById(id);
         return toDto(entity);
     }
+
 
 
 }

@@ -33,53 +33,6 @@ public abstract class AbstractCrudService implements CrudService {
     public AbstractCrudService(JpaRepository repository) {
         this.repository = repository;
     }
-
-    /**
-     * Récupère une page d'entités présentes dans la base de données
-     * et les convertit en DTOs de réponse.
-     * La page et la taille transmises sont normalisées par {@link CrudService}.
-     *
-     * @param page l'index de la page souhaitée
-     * @param taille le nombre d'éléments souhaités par page
-     * @return une page d'objets {@link ResponseDto}
-     */
-    public Page<ResponseDto> getAll(int page, int taille) {
-
-        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
-
-        return repository.findAll(pageable)
-                .map(this::toDto);
-    }
-
-    /**
-     * Recherche une entité spécifique par son identifiant et la convertit en DTO.
-     *
-     * @param id l'identifiant unique de l'entité recherchée
-     * @return un objet {@link ResponseDto} représentant l'entité trouvée
-     * @throws NotFoundException si aucune entité ne correspond à cet identifiant
-     */
-
-    public ResponseDto getById(Long id) throws Throwable {
-        Object entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
-        return toDto(entity);
-    }
-
-
-    /**
-     * Supprime une entité de la base de données après avoir vérifié son existence,
-     * puis retourne les informations de l'entité supprimée.
-     *
-     * @param id l'identifiant de l'entité à supprimer
-     * @return un objet {@link ResponseDto} contenant les données de l'entité tout juste supprimée
-     * @throws NotFoundException si l'entité à supprimer n'existe pas
-     */
-    public ResponseDto delete(Long id) throws Throwable{
-        Object entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
-        repository.deleteById(id);
-        return toDto(entity);
-    }
     /**
      * Borne la taille de page demandée entre 1 et {@link #TAILLE_MAX}.
      * Une valeur inférieure à 1 retombe sur {@link #TAILLE_DEFAUT}.
@@ -87,7 +40,7 @@ public abstract class AbstractCrudService implements CrudService {
      * @param taille la taille de page transmise par le client
      * @return la taille de page autorisée
      */
-    static int tailleAutorisee(int taille) {
+    protected int tailleAutorisee(int taille) {
         if (taille < 1) {
             return TAILLE_DEFAUT;
         }
@@ -100,7 +53,7 @@ public abstract class AbstractCrudService implements CrudService {
      * @param page l'index de page transmis par le client
      * @return l'index de page autorisé
      */
-    static int pageAutorisee(int page) {
+    protected int pageAutorisee(int page) {
         return Math.max(page, 0);
     }
 

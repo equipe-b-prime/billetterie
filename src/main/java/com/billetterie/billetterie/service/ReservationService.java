@@ -100,6 +100,7 @@ public class ReservationService extends AbstractCrudService {
                         .nom(reservation.getClient().getNom())
                         .prenom(reservation.getClient().getPrenom())
                         .telephone(reservation.getClient().getTelephone())
+                        .email(reservation.getClient().getEmail())
                         .build()
                 ).evenement(EvenementResponseDto.builder()
                         .id(reservation.getEvenement().getId())
@@ -150,13 +151,32 @@ public class ReservationService extends AbstractCrudService {
      * @param taille le nombre d'éléments souhaités par page
      * @return une page d'objets {@link ResponseDto}
      */
-    public Page<ResponseDto> getAll(int page, int taille) {
+    public Page<ResponseDto> getAllSansEmail(int page, int taille) {
 
         Sort sort = Sort.by(Sort.Order.desc("dateCreation"));
         Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille),sort);
 
         return reservationRepository.findAll(pageable)
                 .map(this::toDto);
+    }
+
+    public Page<ResponseDto> getReservationByEmailClient(String email, int page, int taille) {
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille), Sort.by("id"));
+        return reservationRepository.findReservationByEmailClient(email, pageable).map(this::toDto);
+    }
+
+    public Page<ResponseDto> getAll (String email, int page, int taille){
+        if (email == null || email.isEmpty()) {
+            return getAllSansEmail(page, taille);
+        } else {
+            return getReservationByEmailClient(email, page, taille);
+        }
+    }
+
+    public ResponseDto getById(Long id) throws Throwable {
+        Object entity = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        return toDto(entity);
     }
 
     /**
@@ -169,7 +189,7 @@ public class ReservationService extends AbstractCrudService {
     public ResponseDto create(RequestDto requestDto) {
         ReservationRequestDto reservationRequestDto = (ReservationRequestDto) requestDto;
 
-        // 1. Récupération du client, de l'événement (avec verrou) et du statut
+
         Client client = clientRepository.findById(reservationRequestDto.getClientId())
                 .orElseThrow(() -> new NotFoundException("Client non trouvé : " + reservationRequestDto.getClientId()));
 
@@ -297,7 +317,6 @@ public class ReservationService extends AbstractCrudService {
      * @throws NotFoundException si la réservation n'existe pas
      * @throws IllegalStateException si la réservation est dans un statut non supprimable (ex: PAYEE)
      */
-    @Override
     public ResponseDto delete(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));

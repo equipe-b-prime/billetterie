@@ -32,8 +32,8 @@ public class PlaceController {
      */
     @GetMapping
     public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10")int taille) {
-        return new Response<>(placeService.getAll(page,taille).getContent());
+                                        @RequestParam(defaultValue = "10")int size) {
+        return new Response<>(placeService.getAll(page,size).getContent());
     }
 
     /**

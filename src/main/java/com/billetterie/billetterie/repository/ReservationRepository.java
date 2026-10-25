@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Repository de gestion des Reservations.
  */
@@ -44,4 +46,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Page<Reservation> findByEvenementId(Long evenementId, Pageable pageable);
 
     boolean existsByEvenementId(long id);
+
+    @Query("select r from Reservation r where Lower(r.client.email) = Lower(:email)")
+    Page<Reservation> findReservationByEmailClient(@Param("email") String email,Pageable pageable);
 }

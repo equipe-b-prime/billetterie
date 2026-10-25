@@ -13,6 +13,9 @@ import com.billetterie.billetterie.exception.RessourceUtiliseeException;
 import com.billetterie.billetterie.repository.EvenementRepository;
 import com.billetterie.billetterie.repository.PlaceRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -142,7 +145,6 @@ public class SalleService extends AbstractCrudService {
      * @return un objet {@link ResponseDto} contenant les données de l'entité tout juste supprimée
      * @throws NotFoundException si l'entité à supprimer n'existe pas
      */
-    @Override
     public ResponseDto delete(Long id) throws Throwable{
         Object entity = salleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
@@ -155,6 +157,37 @@ public class SalleService extends AbstractCrudService {
         }
         salleRepository.deleteById(id);
         return toDto(entity);
+    }
+
+
+    /**
+     * Recherche une entité spécifique par son identifiant et la convertit en DTO.
+     *
+     * @param id l'identifiant unique de l'entité recherchée
+     * @return un objet {@link ResponseDto} représentant l'entité trouvée
+     * @throws NotFoundException si aucune entité ne correspond à cet identifiant
+     */
+
+    public ResponseDto getById(Long id) throws Throwable {
+        Object entity = salleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+        return toDto(entity);
+    }
+    /**
+     * Récupère une page d'entités présentes dans la base de données
+     * et les convertit en DTOs de réponse.
+     * La page et la taille transmises sont normalisées par {@link CrudService}.
+     *
+     * @param page l'index de la page souhaitée
+     * @param taille le nombre d'éléments souhaités par page
+     * @return une page d'objets {@link ResponseDto}
+     */
+    public Page<ResponseDto> getAll(int page, int taille) {
+
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
+
+        return salleRepository.findAll(pageable)
+                .map(this::toDto);
     }
 
     /**

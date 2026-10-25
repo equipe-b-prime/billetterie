@@ -228,16 +228,19 @@ to Les détails de l'événement supprimé.
         return toDto(evenement);
         }
 
-    public Page<EvenementResponseDto> findByHoraireBetweenOrderByHoraireAsc(LocalDateTime du, LocalDateTime au,int page,int taille) {
+    public Page<EvenementResponseDto> findByHoraireBetweenOrderByHoraireAsc(LocalDateTime du, LocalDateTime au, int page, int taille) {
+        if (du == null) {du = evenementRepository.findPremiereDate();}
+        if (au == null) {au = evenementRepository.findDerniereDate();}
+        if (au.isBefore(du)) {throw new IllegalArgumentException("La date de fin doit être postérieure à la date de début.");}
         Pageable pageable = PageRequest.of(page, taille);
-        Page<Evenement> evenements = evenementRepository.findByHoraireBetweenOrderByHoraireAsc(du, au,pageable);
+        Page<Evenement> evenements = evenementRepository.findByHoraireBetweenOrderByHoraireAsc(du, au, pageable);
         return evenements.map(this::toDto);
     }
     public Page<EvenementResponseDto> getEvenements(int page, int taille, LocalDateTime du, LocalDateTime au) {
-        if (du != null && au != null) {
-           return findByHoraireBetweenOrderByHoraireAsc(du,au,page,taille) ;
+        if (du == null && au == null) {
+           return getAll(page,taille);
         } else {
-            return  getAll(page,taille);
+            return  findByHoraireBetweenOrderByHoraireAsc(du,au,page,taille) ;
         }
     }
 }

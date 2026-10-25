@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EvenementResponseDto implements ResponseDto {
-
     private Long id;
     private String titre;
     private String description;

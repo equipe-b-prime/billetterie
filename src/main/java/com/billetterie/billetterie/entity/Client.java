@@ -27,4 +27,7 @@ public class Client {
     private String prenom;
     @Column(length = 20,unique = true)
     private String telephone;
+    @Column(length = 20,unique = true)
+    private String email;
+
 }

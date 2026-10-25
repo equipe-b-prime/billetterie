@@ -32,8 +32,8 @@ public class SalleController {
 
     @GetMapping
     public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10")int taille) {
-        return new Response<>(salleService.getAll(page,taille).getContent());
+                                        @RequestParam(defaultValue = "10")int size) {
+        return new Response<>(salleService.getAll(page,size).getContent());
     }
 
     /**
@@ -114,7 +114,6 @@ public class SalleController {
         }
         return new Response<>(salleService.findBySalleIdOrderByRangAscNumeroAsc(id));
     }
-
     @GetMapping("/{id}/evenements")
     private Response<ResponseDto> getEvenementsBySalle(@PathVariable Long id) {
         return new Response<>(salleService.getEvenementsBySalleId(id));

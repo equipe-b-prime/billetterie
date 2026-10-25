@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -16,13 +17,15 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonPropertyOrder({"status", "nombre", "hasError", "data"})
+@JsonPropertyOrder({"status", "nombre", "totalElements", "totalPages", "hasError", "data"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Response<T> {
     private Status status;
     private boolean hasError;
     private List<T> data;
     private Long nombre;
+    private Long totalElements;
+    private Integer totalPages;
 
     /**
      * Constructeur pour une liste de résultats.
@@ -46,5 +49,14 @@ public class Response<T> {
         this.status = new Status(800, "Opération effectuée avec succès");
         this.hasError = false;
         this.nombre = 1L;
+    }
+
+    public Response(Page<T> page) {
+        this.status = new Status(800, "Opération effectuée avec succès");
+        this.hasError = false;
+        this.data = page.getContent();
+        this.nombre = (long) page.getContent().size();
+        this.totalElements = page.getTotalElements();
+        this.totalPages = page.getTotalPages();
     }
 }

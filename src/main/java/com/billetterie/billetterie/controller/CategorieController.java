@@ -31,8 +31,8 @@ public class CategorieController {
      */
     @GetMapping
     public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "10")int taille) {
-        return new Response<>(categorieService.getAll(page,taille).getContent());
+                                 @RequestParam(defaultValue = "10")int size) {
+        return new Response<>(categorieService.getAll(page,size).getContent());
     }
 
     /**

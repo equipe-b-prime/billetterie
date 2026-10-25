@@ -20,7 +20,7 @@ public interface CrudService {
     /**
      * Nombre d'éléments retournés par défaut lorsqu'une taille de page invalide est transmise.
      */
-    int TAILLE_DEFAUT = 10;
+    int TAILLE_DEFAUT = 20;
 
     /**
      * Nombre maximal d'éléments qu'une requête paginée est autorisée à retourner.
