@@ -5,7 +5,6 @@ import com.billetterie.billetterie.entity.*;
 import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.exception.RessourceUtiliseeException;
 import com.billetterie.billetterie.repository.*;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,8 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,6 +39,8 @@ public class ReservationService extends AbstractCrudService {
     private final BilletRepository billetRepository;
     private final PaiementRepository paiementRepository;
     private final RemboursementRepository remboursementRepository;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM- yyyy HH:mm:ss");
+
 
 
     /**
@@ -193,6 +196,7 @@ public class ReservationService extends AbstractCrudService {
      * @param requestDto Les données de la requête pour créer la réservation.
      * @return ReservationResponseDto Les détails de la réservation créée.
      */
+    @Transactional
     public ResponseDto create(RequestDto requestDto) {
         ReservationRequestDto reservationRequestDto = (ReservationRequestDto) requestDto;
 
@@ -476,7 +480,30 @@ public class ReservationService extends AbstractCrudService {
                     tempsExpiration);
         }
         reservationRepository.saveAll(reservationexpiree);
+    }
 
+    @Transactional(readOnly = true)
+    public byte[] exporterReservationsCsv(Long evenementId, boolean inclureAnnulees) {
 
+        if (!evenementRepository.existsById(evenementId)) {
+            throw new NotFoundException("Événement introuvable ID : " + evenementId);
+        }
+        List<ReservationExportDto> reservations = reservationRepository.findReservationsPourExport(evenementId, inclureAnnulees);
+
+        StringBuilder csv = new StringBuilder("rang;numéro;catégorie;nom du client;email;statut;date de création\n");
+
+        for (ReservationExportDto r : reservations) {
+            String date = r.getDateCreation() != null ? r.getDateCreation().format(DATE_FORMATTER) : "";
+
+            csv.append(r.getRang()).append(";")
+                    .append(r.getNumero()).append(";")
+                    .append(r.getNomCategorie()).append(";")
+                    .append(r.getNomClient()).append(";")
+                    .append(r.getEmailClient()).append(";")
+                    .append(r.getStatut()).append(";")
+                    .append(date).append("\n");
+        }
+
+        return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

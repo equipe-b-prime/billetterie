@@ -13,6 +13,7 @@ import com.billetterie.billetterie.exception.RessourceUtiliseeException;
 import com.billetterie.billetterie.repository.EvenementRepository;
 import com.billetterie.billetterie.repository.PlaceRepository;
 import com.billetterie.billetterie.repository.SalleRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -89,7 +90,8 @@ public class SalleService extends AbstractCrudService {
      * @param requestDto Les données de la requête pour créer la salle.
      * @return SalleResponseDto Les détails de la salle créée.
      */
-    @Override
+
+    @Transactional
     public ResponseDto create(RequestDto requestDto) {
         SalleRequestDto salleRequest = (SalleRequestDto) requestDto;
         if(salleRepository.existsByNomAndVille(salleRequest.getNom(), salleRequest.getVille())) {
@@ -107,7 +109,7 @@ public class SalleService extends AbstractCrudService {
      * @param requestDto Les données de la requête pour modifier la salle.
      * @return SalleResponseDto Les détails de la salle modifiée.
      */
-    @Override
+    @Transactional
     public ResponseDto update(Long id, RequestDto requestDto) {
         SalleRequestDto salleRequest = (SalleRequestDto) requestDto;
         Salle salle = salleRepository.findById(id)
@@ -158,10 +160,8 @@ public class SalleService extends AbstractCrudService {
         salleRepository.deleteById(id);
         return toDto(entity);
     }
-
-
     /**
-     * Recherche une entité spécifique par son identifiant et la convertit en DTO.
+     * Recherche une entité spécif  ique par son identifiant et la convertit en DTO.
      *
      * @param id l'identifiant unique de l'entité recherchée
      * @return un objet {@link ResponseDto} représentant l'entité trouvée

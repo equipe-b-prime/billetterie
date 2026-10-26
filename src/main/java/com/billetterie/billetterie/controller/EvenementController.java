@@ -1,16 +1,19 @@
 package com.billetterie.billetterie.controller;
 
-import com.billetterie.billetterie.dto.EvenementRequestDto;
-import com.billetterie.billetterie.dto.EvenementResponseDto;
-import com.billetterie.billetterie.dto.ResponseDto;
+import com.billetterie.billetterie.dto.*;
 import com.billetterie.billetterie.service.EvenementService;
+import com.billetterie.billetterie.service.ReservationService;
 import com.billetterie.billetterie.utils.response.Response;
 import jakarta.validation.Valid;
 import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Contrôleur REST exposant les endpoints de gestion des événements.
@@ -19,14 +22,16 @@ import java.time.LocalDateTime;
 @RequestMapping("/evenements")
 public class EvenementController {
     private final EvenementService evenementService;
+    private final ReservationService reservationService;
 
     /**
      * Constructeur injectant le service des événements.
      *
      * @param evenementService le service métier des événements
      */
-    public EvenementController(EvenementService evenementService) {
+    public EvenementController(EvenementService evenementService, ReservationService reservationService) {
         this.evenementService = evenementService;
+        this.reservationService = reservationService;
     }
 
     /**
@@ -103,6 +108,27 @@ public class EvenementController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime du,
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au) {
         return new Response<>(evenementService.getEvenements(page, size, du, au).getContent());
+    }
+    @GetMapping("/{id}/places-libres")
+    public Response<VuePlaceLibreResponseDto> placeLibre(@PathVariable Long id) {
+        return new Response<>(evenementService.placeLibre(id));
+    }
+
+    @GetMapping("/{id}/remplissage")
+    public Response<RemplissageResponseDto> getTauxRemplissage(@PathVariable Long id) {
+        return new Response<>(evenementService.calculerTauxRemplissage(id));
+    }
+    @GetMapping("/{id}/reservations/export")
+    public ResponseEntity<byte[]> exporterReservations(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean inclureAnnulees) {
+
+        byte[] csvContent = reservationService.exporterReservationsCsv(id, inclureAnnulees);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reservations_evenement_" + id + ".csv\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(csvContent);
     }
 }
 

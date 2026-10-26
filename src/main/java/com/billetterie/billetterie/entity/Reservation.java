@@ -44,5 +44,7 @@ public class Reservation {
     @JoinColumn(name = "statut_id")
     private Statut statut;
     private Boolean estRembourse;
+    @Column(name = "place_id")
+    private Long placeId;
 
 }

@@ -1,5 +1,6 @@
 package com.billetterie.billetterie.repository;
 
+import com.billetterie.billetterie.dto.ReservationExportDto;
 import com.billetterie.billetterie.entity.Reservation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,4 +57,28 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("select r from Reservation r where r.statut.libelle = 'PROVISOIRE' and r.dateCreation <= :dateLimite ")
     List<Reservation> findReservationExpirées(@Param("dateLimite") LocalDateTime dateLimite);
+
+    @Query("""
+    SELECT new com.billetterie.billetterie.dto.ReservationExportDto(
+        COALESCE(p.rang, 0),
+        COALESCE(p.numero, 0),
+        COALESCE(c.libelle, 'Placement libre'),
+        cli.nom,
+        cli.email,
+        s.libelle,
+        r.dateCreation
+    )
+    FROM Reservation r
+    JOIN r.client cli
+    JOIN r.statut s
+    LEFT JOIN Place p ON p.id = r.placeId
+    LEFT JOIN p.categorie c
+    WHERE r.evenement.id = :evenementId
+    AND (:inclureAnnulees = true OR UPPER(s.libelle) <> 'ANNULEE')
+    ORDER BY c.libelle ASC NULLS LAST, p.rang ASC, p.numero ASC
+""")
+    List<ReservationExportDto> findReservationsPourExport(
+            @Param("evenementId") Long evenementId,
+            @Param("inclureAnnulees") boolean inclureAnnulees
+    );
 }

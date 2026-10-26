@@ -1,24 +1,20 @@
 package com.billetterie.billetterie.service;
 
 import com.billetterie.billetterie.dto.*;
-import com.billetterie.billetterie.entity.Evenement;
-import com.billetterie.billetterie.entity.EvenementDetailView;
-import com.billetterie.billetterie.entity.Place;
-import com.billetterie.billetterie.entity.Salle;
+import com.billetterie.billetterie.entity.*;
 import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.exception.RessourceUtiliseeException;
-import com.billetterie.billetterie.repository.EvenementRepository;
-import com.billetterie.billetterie.repository.PlaceRepository;
-import com.billetterie.billetterie.repository.ReservationRepository;
-import com.billetterie.billetterie.repository.SalleRepository;
+import com.billetterie.billetterie.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.function.ToIntFunction;
+
 
 /**
  * Service métier gérant les événements.
@@ -30,6 +26,8 @@ import java.util.List;
         private final SalleRepository salleRepository;
         private final PlaceRepository placeRepository;
         private final ReservationRepository reservationRepository;
+        private final VuePlaceLibreRepository vuePlaceLibreRepository;
+        private final VueRemplissageCategorieRepository vueRemplissageRepository;
 
         /**
          * Constructeur injectant les repositories des événements et des salles.
@@ -37,11 +35,13 @@ import java.util.List;
          * @param evenementRepository le repository des événements
          * @param salleRepository le repository des salles
          */
-        public EvenementService(EvenementRepository evenementRepository, SalleRepository salleRepository, PlaceRepository placeRepository, ReservationRepository reservationRepository) {
+        public EvenementService(EvenementRepository evenementRepository, SalleRepository salleRepository, PlaceRepository placeRepository, ReservationRepository reservationRepository, VuePlaceLibreRepository vuePlaceLibreRepository, VueRemplissageCategorieRepository vueRemplissageRepository) {
             this.evenementRepository = evenementRepository;
             this.salleRepository = salleRepository;
             this.placeRepository = placeRepository;
             this.reservationRepository = reservationRepository;
+            this.vuePlaceLibreRepository = vuePlaceLibreRepository;
+            this.vueRemplissageRepository = vueRemplissageRepository;
         }
 
         /**
@@ -242,5 +242,95 @@ to Les détails de l'événement supprimé.
         } else {
             return  findByHoraireBetweenOrderByHoraireAsc(du,au,page,taille) ;
         }
+    }
+
+    public List<VuePlaceLibreResponseDto> placeLibre(Long id) {
+        // 1. Vérifier simplement si l'événement existe (plus rapide que findById)
+        if (!evenementRepository.existsById(id)) {
+            throw new NotFoundException("Événement introuvable");
+        }
+
+        // 2. Récupérer les données de la vue
+        List<VuePlaceLibre> vuesPlacesLibres = vuePlaceLibreRepository.findByEvenementId(id);
+
+        // 3. Construire le DTO sans l'événement
+        return vuesPlacesLibres.stream()
+                .map(vue -> VuePlaceLibreResponseDto.builder()
+                        .id(vue.getId())
+                        .categorie(vue.getCategorie())
+                        .placesDisponibles(vue.getPlacesDisponibles())
+                        .build())
+                        .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public RemplissageResponseDto calculerTauxRemplissage(Long evenementId) {
+        verifierExistenceEvenement(evenementId);
+
+        List<RemplissageCategorieDto> detailsParCategorie = chargerDetailsParCategorie(evenementId);
+
+        // Correction des méthodes références Lombok (getters)
+        int totalPlaces = calculerTotal(detailsParCategorie, RemplissageCategorieDto::getTotalPlaces);
+        validerSalleNonVide(totalPlaces);
+
+        int totalProvisoires = calculerTotal(detailsParCategorie, RemplissageCategorieDto::getPlacesProvisoires);
+        int totalPayees = calculerTotal(detailsParCategorie, RemplissageCategorieDto::getPlacesPayees);
+        double pourcentageGlobal = calculerPourcentage(totalProvisoires + totalPayees, totalPlaces);
+
+        return new RemplissageResponseDto(
+                evenementId,
+                totalPlaces,
+                totalProvisoires,
+                totalPayees,
+                pourcentageGlobal,
+                detailsParCategorie
+        );
+    }
+
+
+    private void verifierExistenceEvenement(Long evenementId) {
+        if (!evenementRepository.existsById(evenementId)) {
+            throw new NotFoundException("Événement introuvable ID : " + evenementId);
+        }
+    }
+
+    private List<RemplissageCategorieDto> chargerDetailsParCategorie(Long evenementId) {
+        return vueRemplissageRepository.findByEvenementId(evenementId).stream()
+                .map(this::mapToCategorieDto)
+                .toList();
+    }
+
+    private RemplissageCategorieDto mapToCategorieDto(VueRemplissageCategorie vue) {
+        int total = vue.getTotalPlaces();
+        int provisoires = vue.getPlacesProvisoires();
+        int payees = vue.getPlacesPayees();
+
+        // Calcul du pourcentage individuel de la catégorie
+        double pourcentageCategorie = calculerPourcentage(provisoires + payees, total);
+
+        // Instanciation des 5 paramètres de @AllArgsConstructor
+        return new RemplissageCategorieDto(
+                vue.getNomCategorie(),
+                total,
+                provisoires,
+                payees,
+                pourcentageCategorie
+        );
+    }
+
+    private void validerSalleNonVide(int totalPlaces) {
+        if (totalPlaces == 0) {
+            throw new IllegalStateException("La salle associée à cet événement ne possède aucune place.");
+        }
+    }
+
+    private int calculerTotal(List<RemplissageCategorieDto> details, ToIntFunction<RemplissageCategorieDto> getter) {
+        return details.stream().mapToInt(getter).sum();
+    }
+
+    private double calculerPourcentage(int valeur, int total) {
+        if (total == 0) return 0.0;
+        double pourcentage = (valeur * 100.0) / total;
+        return Math.round(pourcentage * 100.0) / 100.0;
     }
 }

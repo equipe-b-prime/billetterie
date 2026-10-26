@@ -4,9 +4,13 @@ import com.billetterie.billetterie.dto.ReservationRequestDto;
 import com.billetterie.billetterie.dto.ResponseDto;
 import com.billetterie.billetterie.exception.NotFoundException;
 import com.billetterie.billetterie.service.ClientStatsService;
+import com.billetterie.billetterie.service.EvenementService;
 import com.billetterie.billetterie.service.ReservationService;
 import com.billetterie.billetterie.utils.response.Response;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -18,6 +22,7 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final ClientStatsService clientStatsService;
+    private final EvenementService evenementService;
 
     /**
      * Constructeur injectant le service des réservations et celui des statistiques client.
@@ -26,9 +31,10 @@ public class ReservationController {
      * @param clientStatsService le service des statistiques agrégées de réservation par client
      */
     public ReservationController(ReservationService reservationService,
-                                 ClientStatsService clientStatsService) {
+                                 ClientStatsService clientStatsService, EvenementService evenementService) {
         this.reservationService = reservationService;
         this.clientStatsService = clientStatsService;
+        this.evenementService = evenementService;
     }
 
     /**
@@ -161,5 +167,6 @@ public class ReservationController {
     public String  annulerReservation(@PathVariable Long id) throws Throwable {
         return reservationService.annulerReservation(id);
     }
+
 
 }
