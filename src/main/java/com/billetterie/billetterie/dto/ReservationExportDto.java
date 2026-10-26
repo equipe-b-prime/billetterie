@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class    ReservationExportDto {
-    private int rang;
-    private int numero;
+    private Integer rang;
+    private Integer numero;
     private String nomCategorie;
     private String nomClient;
     private String emailClient;

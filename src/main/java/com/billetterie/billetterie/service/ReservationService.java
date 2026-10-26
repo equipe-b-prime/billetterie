@@ -495,7 +495,7 @@ StringBuilder csv = new StringBuilder("rang , numero , categorie , nom du client
         for (ReservationExportDto r : reservations) {
             String date = r.getDateCreation() != null ? r.getDateCreation().format(DATE_FORMATTER) : "";
 
-csv.append(r.getRang()).append(",")
+            csv.append(r.getRang()).append(",")
                     .append(r.getNumero()).append(",")
                     .append(r.getNomCategorie()).append(",")
                     .append(r.getNomClient()).append(",")

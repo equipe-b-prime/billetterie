@@ -130,26 +130,5 @@ public class EvenementController {
                 .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
                 .body(csvContent);
     }
-    @GetMapping("/{id}/places-libres")
-    public Response<VuePlaceLibreResponseDto> placeLibre(@PathVariable Long id) {
-        return new Response<>(evenementService.placeLibre(id));
-    }
-
-    @GetMapping("/{id}/remplissage")
-    public Response<RemplissageResponseDto> getTauxRemplissage(@PathVariable Long id) {
-        return new Response<>(evenementService.calculerTauxRemplissage(id));
-    }
-    @GetMapping("/{id}/reservations/export")
-    public ResponseEntity<byte[]> exporterReservations(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "false") boolean inclureAnnulees) {
-
-        byte[] csvContent = reservationService.exporterReservationsCsv(id, inclureAnnulees);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reservations_evenement_" + id + ".csv\"")
-                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
-                .body(csvContent);
-    }
 }
 
