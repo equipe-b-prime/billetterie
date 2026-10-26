@@ -305,10 +305,8 @@ to Les détails de l'événement supprimé.
         int provisoires = vue.getPlacesProvisoires();
         int payees = vue.getPlacesPayees();
 
-        // Calcul du pourcentage individuel de la catégorie
         double pourcentageCategorie = calculerPourcentage(provisoires + payees, total);
 
-        // Instanciation des 5 paramètres de @AllArgsConstructor
         return new RemplissageCategorieDto(
                 vue.getNomCategorie(),
                 total,

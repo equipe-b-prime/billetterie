@@ -490,7 +490,8 @@ public class ReservationService extends AbstractCrudService {
         }
         List<ReservationExportDto> reservations = reservationRepository.findReservationsPourExport(evenementId, inclureAnnulees);
 
-        StringBuilder csv = new StringBuilder("rang;numéro;catégorie;nom du client;email;statut;date de création\n");
+        StringBuilder csv = new StringBuilder("rang ;  numéro  ;   catégorie   ;   nom du client   ;   email   ;" +
+                "  statut  ;   date de création\n");
 
         for (ReservationExportDto r : reservations) {
             String date = r.getDateCreation() != null ? r.getDateCreation().format(DATE_FORMATTER) : "";
@@ -503,7 +504,6 @@ public class ReservationService extends AbstractCrudService {
                     .append(r.getStatut()).append(";")
                     .append(date).append("\n");
         }
-
         return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
 }
