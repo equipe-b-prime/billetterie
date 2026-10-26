@@ -204,7 +204,7 @@ import java.util.List;
      * @return une page d'objets {@link ResponseDto}
      */
     public Page<EvenementResponseDto> getAll(int page, int taille) {
-        Pageable pageable = PageRequest.of(page, taille);
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
         return evenementRepository.findDetailViews(pageable)
                 .map(view -> toDto(view));
     }
@@ -232,7 +232,7 @@ to Les détails de l'événement supprimé.
         if (du == null) {du = evenementRepository.findPremiereDate();}
         if (au == null) {au = evenementRepository.findDerniereDate();}
         if (au.isBefore(du)) {throw new IllegalArgumentException("La date de fin doit être postérieure à la date de début.");}
-        Pageable pageable = PageRequest.of(page, taille);
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
         Page<Evenement> evenements = evenementRepository.findByHoraireBetweenOrderByHoraireAsc(du, au, pageable);
         return evenements.map(this::toDto);
     }

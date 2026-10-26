@@ -39,7 +39,7 @@ public class EvenementController {
     @GetMapping("/ok")
     public Response<EvenementResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "10") int size) {
-        return new Response<>(evenementService.getAll(page, size).getContent());
+        return new Response<>(evenementService.getAll(page, size));
     }
     /**
      * Récupère un événement à partir de son identifiant.
@@ -93,7 +93,7 @@ public class EvenementController {
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au,
             @RequestParam (defaultValue = "0") int page,
             @RequestParam (defaultValue = "10") int size) {
-        return new Response<>(evenementService.findByHoraireBetweenOrderByHoraireAsc(du, au,page,size).getContent());
+        return new Response<>(evenementService.findByHoraireBetweenOrderByHoraireAsc(du, au,page,size));
     }
 
     @GetMapping
@@ -102,7 +102,7 @@ public class EvenementController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime du,
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au) {
-        return new Response<>(evenementService.getEvenements(page, size, du, au).getContent());
+        return new Response<>(evenementService.getEvenements(page, size, du, au));
     }
 }
 
