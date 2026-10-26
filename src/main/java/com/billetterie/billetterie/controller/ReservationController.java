@@ -110,7 +110,7 @@ public class ReservationController {
     public Response<ResponseDto> getReservationByIdClient(@RequestParam long clientId,
                                                           @RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int size) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdClient(clientId, page, size).getContent());
+        return new Response<>(reservationService.getReservationByIdClient(clientId, page, size));
     }
 
     /**
@@ -126,7 +126,7 @@ public class ReservationController {
     public Response<ResponseDto> getReservationByIdStatut(@PathVariable long statutId,
                                                           @RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int size) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdStatut(statutId, page, size).getContent());
+        return new Response<>(reservationService.getReservationByIdStatut(statutId, page, size));
     }
 
     /**
@@ -142,7 +142,7 @@ public class ReservationController {
     public Response<ResponseDto> getReservationByIdEvenement(@PathVariable long id,
                                                              @RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "10") int size) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdEvenement(id, page, size).getContent());
+        return new Response<>(reservationService.getReservationByIdEvenement(id, page, size));
     }
 
     /**

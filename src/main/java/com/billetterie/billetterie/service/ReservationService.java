@@ -490,18 +490,17 @@ public class ReservationService extends AbstractCrudService {
         }
         List<ReservationExportDto> reservations = reservationRepository.findReservationsPourExport(evenementId, inclureAnnulees);
 
-        StringBuilder csv = new StringBuilder("rang ;  numéro  ;   catégorie   ;   nom du client   ;   email   ;" +
-                "  statut  ;   date de création\n");
+StringBuilder csv = new StringBuilder("rang , numero , categorie , nom du client , email , statut , date de creation\n");
 
         for (ReservationExportDto r : reservations) {
             String date = r.getDateCreation() != null ? r.getDateCreation().format(DATE_FORMATTER) : "";
 
-            csv.append(r.getRang()).append(";")
-                    .append(r.getNumero()).append(";")
-                    .append(r.getNomCategorie()).append(";")
-                    .append(r.getNomClient()).append(";")
-                    .append(r.getEmailClient()).append(";")
-                    .append(r.getStatut()).append(";")
+csv.append(r.getRang()).append(",")
+                    .append(r.getNumero()).append(",")
+                    .append(r.getNomCategorie()).append(",")
+                    .append(r.getNomClient()).append(",")
+                    .append(r.getEmailClient()).append(",")
+                    .append(r.getStatut()).append(",")
                     .append(date).append("\n");
         }
         return csv.toString().getBytes(StandardCharsets.UTF_8);

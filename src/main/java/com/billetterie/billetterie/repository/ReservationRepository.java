@@ -71,7 +71,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     FROM Reservation r
     JOIN r.client cli
     JOIN r.statut s
-    LEFT JOIN Place p ON p.id = r.placeId
+LEFT JOIN Billet b ON b.reservation.id = r.id
+    LEFT JOIN Place p ON p.id = b.place.id
     LEFT JOIN p.categorie c
     WHERE r.evenement.id = :evenementId
     AND (:inclureAnnulees = true OR UPPER(s.libelle) <> 'ANNULEE')

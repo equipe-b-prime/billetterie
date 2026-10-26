@@ -44,7 +44,7 @@ public class EvenementController {
     @GetMapping("/ok")
     public Response<EvenementResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "10") int size) {
-        return new Response<>(evenementService.getAll(page, size).getContent());
+        return new Response<>(evenementService.getAll(page, size));
     }
     /**
      * Récupère un événement à partir de son identifiant.
@@ -98,7 +98,7 @@ public class EvenementController {
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au,
             @RequestParam (defaultValue = "0") int page,
             @RequestParam (defaultValue = "10") int size) {
-        return new Response<>(evenementService.findByHoraireBetweenOrderByHoraireAsc(du, au,page,size).getContent());
+        return new Response<>(evenementService.findByHoraireBetweenOrderByHoraireAsc(du, au,page,size));
     }
 
     @GetMapping
@@ -107,7 +107,28 @@ public class EvenementController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime du,
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss") LocalDateTime au) {
-        return new Response<>(evenementService.getEvenements(page, size, du, au).getContent());
+        return new Response<>(evenementService.getEvenements(page, size, du, au));
+    }
+    @GetMapping("/{id}/places-libres")
+    public Response<VuePlaceLibreResponseDto> placeLibre(@PathVariable Long id) {
+        return new Response<>(evenementService.placeLibre(id));
+    }
+
+    @GetMapping("/{id}/remplissage")
+    public Response<RemplissageResponseDto> getTauxRemplissage(@PathVariable Long id) {
+        return new Response<>(evenementService.calculerTauxRemplissage(id));
+    }
+    @GetMapping("/{id}/reservations/export")
+    public ResponseEntity<byte[]> exporterReservations(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean inclureAnnulees) {
+
+        byte[] csvContent = reservationService.exporterReservationsCsv(id, inclureAnnulees);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reservations_evenement_" + id + ".csv\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(csvContent);
     }
     @GetMapping("/{id}/places-libres")
     public Response<VuePlaceLibreResponseDto> placeLibre(@PathVariable Long id) {
