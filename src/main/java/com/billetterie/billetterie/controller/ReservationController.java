@@ -39,7 +39,7 @@ public class ReservationController {
     @GetMapping
     public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
                                         @RequestParam(defaultValue = "10")int taille) {
-        return new Response<>(reservationService.getAll(page,taille).getContent());
+        return new Response<>(reservationService.getAll(page,taille));
     }
     /**
      * Récupère une réservation à partir de son identifiant.
@@ -102,7 +102,7 @@ public class ReservationController {
     public Response<ResponseDto> getReservationByIdClient(@RequestParam long clientId,
                                                           @RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int taille) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdClient(clientId, page, taille).getContent());
+        return new Response<>(reservationService.getReservationByIdClient(clientId, page, taille));
     }
 
     /**
@@ -118,7 +118,7 @@ public class ReservationController {
     public Response<ResponseDto> getReservationByIdStatut(@PathVariable long statutId,
                                                           @RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int taille) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdStatut(statutId, page, taille).getContent());
+        return new Response<>(reservationService.getReservationByIdStatut(statutId, page, taille));
     }
 
     /**
@@ -134,7 +134,7 @@ public class ReservationController {
     public Response<ResponseDto> getReservationByIdEvenement(@PathVariable long id,
                                                              @RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "10") int taille) throws Throwable {
-        return new Response<>(reservationService.getReservationByIdEvenement(id, page, taille).getContent());
+        return new Response<>(reservationService.getReservationByIdEvenement(id, page, taille));
     }
 
     /**

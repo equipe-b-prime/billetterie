@@ -33,7 +33,7 @@ public class SalleController {
     @GetMapping
     public Response<ResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
                                         @RequestParam(defaultValue = "10")int taille) {
-        return new Response<>(salleService.getAll(page,taille).getContent());
+        return new Response<>(salleService.getAll(page,taille));
     }
 
     /**

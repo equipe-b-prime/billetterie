@@ -204,7 +204,7 @@ import java.util.List;
      * @return une page d'objets {@link ResponseDto}
      */
     public Page<EvenementResponseDto> getAll(int page, int taille) {
-        Pageable pageable = PageRequest.of(page, taille);
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
         return evenementRepository.findDetailViews(pageable)
                 .map(view -> toDto(view));
     }
@@ -229,7 +229,7 @@ to Les détails de l'événement supprimé.
         }
 
     public Page<EvenementResponseDto> findByHoraireBetweenOrderByHoraireAsc(LocalDateTime du, LocalDateTime au,int page,int taille) {
-        Pageable pageable = PageRequest.of(page, taille);
+        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille));
         Page<Evenement> evenements = evenementRepository.findByHoraireBetweenOrderByHoraireAsc(du, au,pageable);
         return evenements.map(this::toDto);
     }
