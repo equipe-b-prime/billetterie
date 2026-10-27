@@ -25,7 +25,7 @@ import java.util.List;
  * Fournit la création, la modification, la suppression et les conversions entité/DTO.
  */
 @Service
-    public class EvenementService implements CrudService{
+    public class EvenementService extends AbstractCrudService{
         private final EvenementRepository evenementRepository;
         private final SalleRepository salleRepository;
         private final PlaceRepository placeRepository;
@@ -38,6 +38,7 @@ import java.util.List;
          * @param salleRepository le repository des salles
          */
         public EvenementService(EvenementRepository evenementRepository, SalleRepository salleRepository, PlaceRepository placeRepository, ReservationRepository reservationRepository) {
+            super(evenementRepository);
             this.evenementRepository = evenementRepository;
             this.salleRepository = salleRepository;
             this.placeRepository = placeRepository;

@@ -190,6 +190,9 @@ public class SalleService extends AbstractCrudService {
                 .map(this::toDto);
     }
 
+
+
+
     /**
      *
      * @param id
@@ -220,6 +223,12 @@ public class SalleService extends AbstractCrudService {
                 .map(dto -> (ResponseDto) dto)
                 .toList();
 
+    }
+    public List<ResponseDto> getPlaces(Long id, String categorie) {
+        if (categorie != null && !categorie.isBlank()) {
+            return  getPlacesBySalle(id, categorie);
+        }
+        return findBySalleIdOrderByRangAscNumeroAsc(id);
     }
 
     public List<ResponseDto> getEvenementsBySalleId(Long id) {

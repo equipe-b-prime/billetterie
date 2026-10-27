@@ -109,9 +109,6 @@ public class SalleController {
     public Response<ResponseDto> getPlacesBySalle(
             @PathVariable Long id,
             @RequestParam(name = "categorie", required = false) String categorie) {
-        if (categorie != null && !categorie.isBlank()) {
-            return new Response<>(salleService.getPlacesBySalle(id, categorie));
-        }
         return new Response<>(salleService.findBySalleIdOrderByRangAscNumeroAsc(id));
     }
     @GetMapping("/{id}/evenements")
