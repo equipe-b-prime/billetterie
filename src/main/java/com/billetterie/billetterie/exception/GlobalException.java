@@ -1,6 +1,5 @@
 package com.billetterie.billetterie.exception;
 
-import com.billetterie.billetterie.entity.Reservation;
 import com.billetterie.billetterie.utils.response.Response;
 import com.billetterie.billetterie.utils.response.Status;
 import org.springframework.http.HttpStatus;
@@ -15,7 +14,7 @@ import java.util.*;
 
 /**
  * Gestionnaire global des exceptions de l'application.
- * Centralise le format des réponses d'erreur (validation, ressource introuvable).
+ * Centralise le format des réponses d'erreur.
  */
 @RestControllerAdvice
 public class GlobalException {
@@ -23,8 +22,10 @@ public class GlobalException {
     /**
      * Gère les erreurs de validation des requêtes (@Valid).
      *
+     * Code HTTP : 400 BAD_REQUEST
+     *
      * @param ex L'exception de validation.
-     * @return ResponseEntity<Response<Map<String,String>>> La liste des erreurs par champ.
+     * @return ResponseEntity avec la liste des erreurs de validation par champ.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Response<Map<String, String>>> handleValidationExceptions(
@@ -45,10 +46,12 @@ public class GlobalException {
     }
 
     /**
-     * Gère les erreurs de ressource introuvable.
+     * Gère les erreurs de ressource introuvable en BDD.
+     *
+     * Code HTTP : 404 NOT_FOUND
      *
      * @param ex L'exception de ressource introuvable.
-     * @return ResponseEntity<Response> Le message d'erreur encapsulé.
+     * @return ResponseEntity avec le message d'erreur.
      */
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Response<String>> notFoundException(NotFoundException ex) {
@@ -60,7 +63,12 @@ public class GlobalException {
     }
 
     /**
-     * Gère les erreurs où paramètre envoyé dans une requête ne corresponde pas
+     * Gère les erreurs de type de paramètre dans la requête (ex. transmettre une chaîne au lieu d'un entier).
+     *
+     * Code HTTP : 400 BAD_REQUEST
+     *
+     * @param ex L'exception de non-correspondance de type.
+     * @return ResponseEntity expliquant le type attendu.
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Response<List<String>>> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
@@ -68,16 +76,11 @@ public class GlobalException {
         String typeAtendu;
 
         switch (typeBrut) {
-            case "int", "Long", "Integer" ->
-                    typeAtendu = "entier";
-            case "boolean", "Boolean" ->
-                    typeAtendu = "booléen";
-            case "String" ->
-                    typeAtendu = "chaîne de caractères";
-            case "LocalDateTime" ->
-                    typeAtendu = "date et heure au format 'dd-MM-yyyy HH:mm:ss'";
-            default ->
-                    typeAtendu = typeBrut.isEmpty() ? "valide" : typeBrut;
+            case "int", "Long", "Integer" -> typeAtendu = "entier";
+            case "boolean", "Boolean" -> typeAtendu = "booléen";
+            case "String" -> typeAtendu = "chaîne de caractères";
+            case "LocalDateTime" -> typeAtendu = "date et heure au format 'dd-MM-yyyy HH:mm:ss'";
+            default -> typeAtendu = typeBrut.isEmpty() ? "valide" : typeBrut;
         }
 
         Response<List<String>> response = new Response<>(Collections.emptyList());
@@ -91,8 +94,14 @@ public class GlobalException {
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
     /**
-     * Gère les erreurs où on a un cas de doublon de ressource
+     * Gère les doublons de ressource (ex. unicité titre/horaire ou email).
+     *
+     * Code HTTP : 409 CONFLICT
+     *
+     * @param ex L'exception de doublon.
+     * @return ResponseEntity indiquant le conflit.
      */
     @ExceptionHandler(DoublonRessourceException.class)
     public ResponseEntity<Response<String>> doublonRessourceException(DoublonRessourceException ex) {
@@ -102,8 +111,14 @@ public class GlobalException {
         reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), "Doublon de ressource : " + ex.getMessage()));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
     }
+
     /**
-     * Gère les erreurs où on a un cas de ressource utilisée par une autre ressource
+     * Gère les tentatives de suppression ou modification d'une ressource référencée ailleurs (FK).
+     *
+     * Code HTTP : 409 CONFLICT
+     *
+     * @param ex L'exception de ressource liée.
+     * @return ResponseEntity indiquant l'impossibilité d'effectuer l'opération.
      */
     @ExceptionHandler(RessourceUtiliseeException.class)
     public ResponseEntity<Response<String>> ressourceUtiliseeException(RessourceUtiliseeException ex) {
@@ -115,9 +130,12 @@ public class GlobalException {
     }
 
     /**
-     * Gère les erreurs où on a un cas de ressource utilisée par une autre ressource
-     * @param ex
-     * @return
+     * Gère les arguments invalides transmis à une méthode métier.
+     *
+     * Code HTTP : 400 BAD_REQUEST
+     *
+     * @param ex L'exception d'argument invalide.
+     * @return ResponseEntity avec le détail de l'erreur.
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Response<String>> illegalArgumentException(IllegalArgumentException ex) {
@@ -126,22 +144,22 @@ public class GlobalException {
         reponse.setHasError(true);
         reponse.setStatus(new Status(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(reponse);
-    }/**
-     * Gère les erreurs où on a un cas de ressource utilisée par une autre ressource
-     * @param ex
-     * @return
+    }
+
+    /**
+     * Gère les erreurs d'état d'exécution invalide (ex. transition de statut d'une réservation impossible).
+     *
+     * Code HTTP : 409 CONFLICT
+     *
+     * @param ex L'exception d'état invalide.
+     * @return ResponseEntity avec le message d'erreur.
      */
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Response<String>> IllegalStateException(IllegalStateException ex) {
+    public ResponseEntity<Response<String>> handleIllegalStateException(IllegalStateException ex) {
         Response<String> reponse = new Response<>(Collections.emptyList());
         reponse.setNombre(0L);
         reponse.setHasError(true);
         reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), ex.getMessage()));
-        return ResponseEntity.status(HttpStatus.CONFLICT
-
-        ).body(reponse);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
     }
-
-
-
 }

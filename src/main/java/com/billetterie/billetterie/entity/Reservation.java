@@ -19,7 +19,8 @@ import java.time.LocalDateTime;
 @Table(name = "reservation",indexes = {
         @Index(name = "idx_reservation_client", columnList = "client_id"),
         @Index(name = "idx_reservation_evenement", columnList = "evenement_id"),
-        @Index(name = "idx_reservation_statut", columnList = "statut_id")
+        @Index(name = "idx_reservation_statut", columnList = "statut_id"),
+        @Index(name = "idx_reservation_date_creation", columnList = "date_creation")
 })
 public class Reservation {
     @Id

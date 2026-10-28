@@ -4,6 +4,7 @@ import com.billetterie.billetterie.dto.ReservationExportDto;
 import com.billetterie.billetterie.entity.Reservation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -49,14 +50,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByEvenementId(long id);
 
-    @Query("select r from Reservation r where Lower(r.client.email) = Lower(:email)")
-    Page<Reservation> findReservationByEmailClient(@Param("email") String email,Pageable pageable);
+//    @Query("select r from Reservation r where Lower(r.client.email) = Lower(:email)")
+//    Page<Reservation> findReservationByEmailClient(@Param("email") String email,Pageable pageable);
+
+    @EntityGraph(attributePaths = {"client", "evenement", "statut"})
+    @Query("SELECT r FROM Reservation r WHERE r.client.email = :email")
+    Page<Reservation> findReservationByEmailClient(@Param("email") String email, Pageable pageable);
 
 //    @Query("update Reservation r set r.statut.id = 2 where r.statut.id = 1")
 //    Reservation passerDeProvisoreApaye ()
 
     @Query("select r from Reservation r where r.statut.libelle = 'PROVISOIRE' and r.dateCreation <= :dateLimite ")
-    List<Reservation> findReservationExpirées(@Param("dateLimite") LocalDateTime dateLimite);
+    List<Reservation>   findReservationExpirees(@Param("dateLimite") LocalDateTime dateLimite);
 
     @Query("""
     SELECT new com.billetterie.billetterie.dto.ReservationExportDto(
@@ -82,4 +87,5 @@ LEFT JOIN Billet b ON b.reservation.id = r.id
             @Param("evenementId") Long evenementId,
             @Param("inclureAnnulees") boolean inclureAnnulees
     );
+
 }

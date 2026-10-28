@@ -171,10 +171,24 @@ public class ReservationService extends AbstractCrudService {
                 .map(this::toDto);
     }
 
+//    public Page<ResponseDto> getReservationByEmailClient(String email, int page, int taille) {
+//        Pageable pageable = PageRequest.of(
+//                pageAutorisee(page),
+//                tailleAutorisee(taille),
+//                Sort.by(Sort.Direction.DESC, "dateCreation")
+//        );
+//        return reservationRepository.findReservationByEmailClient(email, pageable).map(this::toDto);
+//    }
     public Page<ResponseDto> getReservationByEmailClient(String email, int page, int taille) {
-        Pageable pageable = PageRequest.of(pageAutorisee(page), tailleAutorisee(taille), Sort.by("id"));
-        return reservationRepository.findReservationByEmailClient(email, pageable).map(this::toDto);
-    }
+    Pageable pageable = PageRequest.of(
+            pageAutorisee(page),
+            tailleAutorisee(taille),
+            Sort.by(Sort.Direction.DESC, "dateCreation")
+        );
+    String emailLower = (email != null) ? email.toLowerCase().trim() : "";
+    return reservationRepository.findReservationByEmailClient(emailLower, pageable)
+            .map(this::toDto);
+}
 
     public Page<ResponseDto> getAll(String email, int page, int taille) {
         if (email == null || email.isEmpty()) {
@@ -190,100 +204,100 @@ public class ReservationService extends AbstractCrudService {
         return toDto(entity);
     }
 
-    /**
-     * Crée une nouvelle réservation.
-     *
-     * @param requestDto Les données de la requête pour créer la réservation.
-     * @return ReservationResponseDto Les détails de la réservation créée.
-     */
-    @Transactional
-    public ResponseDto create(RequestDto requestDto) {
-        ReservationRequestDto reservationRequestDto = (ReservationRequestDto) requestDto;
+        /**
+         * Crée une nouvelle réservation.
+         *
+         * @param requestDto Les données de la requête pour créer la réservation.
+         * @return ReservationResponseDto Les détails de la réservation créée.
+         */
+        @Transactional
+        public ResponseDto create(RequestDto requestDto) {
+            ReservationRequestDto reservationRequestDto = (ReservationRequestDto) requestDto;
 
 
-        Client client = clientRepository.findById(reservationRequestDto.getClientId())
-                .orElseThrow(() -> new NotFoundException("Client non trouvé : " + reservationRequestDto.getClientId()));
+            Client client = clientRepository.findById(reservationRequestDto.getClientId())
+                    .orElseThrow(() -> new NotFoundException("Client non trouvé : " + reservationRequestDto.getClientId()));
 
-        Evenement evenement = evenementRepository.findByIdForUpdate(reservationRequestDto.getEvenementId())
-                .orElseThrow(() -> new NotFoundException("Événement non trouvé : " + reservationRequestDto.getEvenementId()));
-        if (evenement.getHoraire().isBefore(LocalDateTime.now())) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.FRENCH);
-            String dateFormatee = evenement.getHoraire().format(formatter);
-            throw new IllegalArgumentException("Impossible de réserver pour un événement passé.");
-        }
-
-        Statut statutProvisoire = statutRepository.findByLibelle("PROVISOIRE")
-                .orElseThrow(() -> new NotFoundException("Statut PROVISOIRE non configuré"));
-
-        Long salleId = evenement.getSalle().getId();
-        BigDecimal montantTotalGlobal = BigDecimal.ZERO;
-
-        List<Place> toutesLesPlaces = new ArrayList<>();
-        Map<Place, BigDecimal> prixParPlace = new HashMap<>();
-
-        // 2. Traitement de chaque catégorie sélectionnée
-        for (LigneReservationDto ligne : reservationRequestDto.getLignes()) {
-            Categorie categorie = categorieRepository.findById(ligne.getCategorieId())
-                    .orElseThrow(() -> new NotFoundException("Catégorie non trouvée : " + ligne.getCategorieId()));
-
-            // Récupération du tarif pour ce couple (Événement + Catégorie)
-            BigDecimal prixUnitaire = tarifEvenementRepository
-                    .findPrixParEvenementEtCategorie(evenement.getId(), categorie.getId())
-                    .orElseThrow(() -> new NotFoundException("Tarif non trouvé pour la catégorie : " + categorie.getLibelle()));
-
-            // Recherche des places disponibles dans la salle
-            int quantiteDemandee = ligne.getQuantite();
-            List<Place> placesDisponibles = placeRepository.findPlacesDisponibles(
-                    salleId,
-                    evenement.getId(),
-                    categorie.getId(),
-                    PageRequest.of(0, quantiteDemandee)
-            );
-
-            // Vérification de la disponibilité
-            if (placesDisponibles.size() < quantiteDemandee) {
-                throw new IllegalStateException("Places insuffisantes pour la catégorie " + categorie.getLibelle()
-                        + ". Demandées : " + quantiteDemandee + ", Disponibles : " + placesDisponibles.size());
+            Evenement evenement = evenementRepository.findByIdForUpdate(reservationRequestDto.getEvenementId())
+                    .orElseThrow(() -> new NotFoundException("Événement non trouvé : " + reservationRequestDto.getEvenementId()));
+            if (evenement.getHoraire().isBefore(LocalDateTime.now())) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.FRENCH);
+                String dateFormatee = evenement.getHoraire().format(formatter);
+                throw new IllegalArgumentException("Impossible de réserver pour un événement passé.");
             }
 
-            // Cumul du montant total
-            BigDecimal sousTotal = prixUnitaire.multiply(BigDecimal.valueOf(quantiteDemandee));
-            montantTotalGlobal = montantTotalGlobal.add(sousTotal);
+            Statut statutProvisoire = statutRepository.findByLibelle("PROVISOIRE")
+                    .orElseThrow(() -> new NotFoundException("Statut PROVISOIRE non configuré"));
 
-            // Association des places avec leur prix
-            for (Place place : placesDisponibles) {
-                toutesLesPlaces.add(place);
-                prixParPlace.put(place, prixUnitaire);
+            Long salleId = evenement.getSalle().getId();
+            BigDecimal montantTotalGlobal = BigDecimal.ZERO;
+
+            List<Place> toutesLesPlaces = new ArrayList<>();
+            Map<Place, BigDecimal> prixParPlace = new HashMap<>();
+
+            // 2. Traitement de chaque catégorie sélectionnée
+            for (LigneReservationDto ligne : reservationRequestDto.getLignes()) {
+                Categorie categorie = categorieRepository.findById(ligne.getCategorieId())
+                        .orElseThrow(() -> new NotFoundException("Catégorie non trouvée : " + ligne.getCategorieId()));
+
+                // Récupération du tarif pour ce couple (Événement + Catégorie)
+                BigDecimal prixUnitaire = tarifEvenementRepository
+                        .findPrixParEvenementEtCategorie(evenement.getId(), categorie.getId())
+                        .orElseThrow(() -> new NotFoundException("Tarif non trouvé pour la catégorie : " + categorie.getLibelle()));
+
+                // Recherche des places disponibles dans la salle
+                int quantiteDemandee = ligne.getQuantite();
+                List<Place> placesDisponibles = placeRepository.findPlacesDisponibles(
+                        salleId,
+                        evenement.getId(),
+                        categorie.getId(),
+                        PageRequest.of(0, quantiteDemandee)
+                );
+
+                // Vérification de la disponibilité
+                if (placesDisponibles.size() < quantiteDemandee) {
+                    throw new IllegalStateException("Places insuffisantes pour la catégorie " + categorie.getLibelle()
+                            + ". Demandées : " + quantiteDemandee + ", Disponibles : " + placesDisponibles.size());
+                }
+
+                // Cumul du montant total
+                BigDecimal sousTotal = prixUnitaire.multiply(BigDecimal.valueOf(quantiteDemandee));
+                montantTotalGlobal = montantTotalGlobal.add(sousTotal);
+
+                // Association des places avec leur prix
+                for (Place place : placesDisponibles) {
+                    toutesLesPlaces.add(place);
+                    prixParPlace.put(place, prixUnitaire);
+                }
             }
+
+            // 3. Sauvegarde de la Réservation
+            Reservation reservation = new Reservation();
+            reservation.setClient(client);
+            reservation.setEvenement(evenement);
+            reservation.setStatut(statutProvisoire);
+            reservation.setDateCreation(LocalDateTime.now());
+            reservation.setMontantTotal(montantTotalGlobal);
+
+            Reservation reservationSauvegardee = reservationRepository.save(reservation);
+
+            // 4. Création des Billets
+            List<Billet> billets = new ArrayList<>();
+            for (Place place : toutesLesPlaces) {
+                Billet billet = Billet.builder()
+                        .reservation(reservationSauvegardee)
+                        .place(place)
+                        .prixApplique(prixParPlace.get(place))
+                        .codeBillet("TKT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
+                        .build();
+
+                billets.add(billet);
+            }
+
+            billetRepository.saveAll(billets);
+
+            return toDto(reservationSauvegardee);
         }
-
-        // 3. Sauvegarde de la Réservation
-        Reservation reservation = new Reservation();
-        reservation.setClient(client);
-        reservation.setEvenement(evenement);
-        reservation.setStatut(statutProvisoire);
-        reservation.setDateCreation(LocalDateTime.now());
-        reservation.setMontantTotal(montantTotalGlobal);
-
-        Reservation reservationSauvegardee = reservationRepository.save(reservation);
-
-        // 4. Création des Billets
-        List<Billet> billets = new ArrayList<>();
-        for (Place place : toutesLesPlaces) {
-            Billet billet = Billet.builder()
-                    .reservation(reservationSauvegardee)
-                    .place(place)
-                    .prixApplique(prixParPlace.get(place))
-                    .codeBillet("TKT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
-                    .build();
-
-            billets.add(billet);
-        }
-
-        billetRepository.saveAll(billets);
-
-        return toDto(reservationSauvegardee);
-    }
 
 
     /**
@@ -366,6 +380,7 @@ public class ReservationService extends AbstractCrudService {
         Statut statut = statutRepository.findByLibelleIgnoreCase("PAYEE")
                 .orElseThrow(() -> new NotFoundException("Statut PAYEE non configuré"));
         reservation.setStatut(statut);
+        reservation.setDatePaiement(LocalDateTime.now());
         return toDto(reservationRepository.save(reservation));
     }
 
@@ -387,13 +402,16 @@ public class ReservationService extends AbstractCrudService {
                 .orElseThrow(() -> new NotFoundException("Réservation non trouvée : " + id));
 
         if ("ANNULEE".equalsIgnoreCase(reservation.getStatut().getLibelle())) {
-            throw new IllegalStateException("Impossible d'annuler. La réservation est déjà annulée.");
+            if (reservation.getEstRembourse()) {
+                throw new IllegalStateException("La réservation a déjà été annulée et remboursée.");
+            } else {
+                throw new IllegalStateException("La réservation a déjà été annulée.");
+            }
         }
-
-        // 1. Traitement du remboursement si nécessaire
-        if ("PAYEE".equalsIgnoreCase(reservation.getStatut().getLibelle())) {
-            genererRemboursementSiEligible(reservation);
+        if (!"PAYEE".equalsIgnoreCase(reservation.getStatut().getLibelle())) {
+            throw new IllegalStateException("Impossible d'annuler une réservation non payée");
         }
+        genererRemboursementSiEligible(reservation);
 
         Statut statutAnnulee = statutRepository.findByLibelleIgnoreCase("ANNULEE")
                 .orElseThrow(() -> new NotFoundException("Statut ANNULEE non configuré"));
@@ -403,7 +421,8 @@ public class ReservationService extends AbstractCrudService {
 
         reservationRepository.save(reservation); // Un seul save() global suffit grâce à @Transactional
 
-        return "Réservation annulée avec succès.";
+        return "Réservation annulée avec succès avce montant de remboursement "
+                + calculerMontantRemboursement(reservation);
     }
     /**
      * Crée et sauvegarde une entité Remboursement si le client y est éligible
@@ -415,15 +434,15 @@ public class ReservationService extends AbstractCrudService {
     private void genererRemboursementSiEligible(Reservation reservation) {
         BigDecimal montant = calculerMontantRemboursement(reservation);
 
-        if (montant.compareTo(BigDecimal.ZERO) > 0) {
+//        if (montant.compareTo(BigDecimal.ZERO) > 0) {
             Remboursement remboursement = new Remboursement();
             remboursement.setReservation(reservation);
-            remboursement.setMontant(montant);
+           remboursement.setMontant(montant);
             remboursement.setDateRemboursement(LocalDateTime.now());
             remboursementRepository.save(remboursement);
 
             reservation.setEstRembourse(true);
-        }
+        //}
     }
 
     /**
@@ -464,15 +483,18 @@ public class ReservationService extends AbstractCrudService {
      * @throws NotFoundException Si le statut "ANNULEE" est introuvable en base de données.
      */
     @Scheduled(fixedRate = 60000)
-    public void libererReservationsExpirées() {
+    public void libererReservationsExpirees() {
         LocalDateTime tempsExpiration = LocalDateTime.now().minusMinutes(15);
-        List<Reservation> reservationexpiree = reservationRepository.findReservationExpirées(tempsExpiration);
-        if (reservationexpiree.isEmpty()) return;
+        List<Reservation> reservationexpiree = reservationRepository.findReservationExpirees(tempsExpiration);
+        if (reservationexpiree.isEmpty()) {
+            log.info("pas de reservation provisoire") ;
+            return ;
+        }
         Statut statutAnnule = statutRepository.findByLibelle("ANNULEE")
                 .orElseThrow(() -> new NotFoundException("Statut ANNULEE non configuré"));
         for (Reservation r :reservationexpiree){
             r.setStatut(statutAnnule);
-            LocalDateTime momentExpiration = r.getDateCreation().plusMinutes(15);
+//            LocalDateTime momentExpiration = r.getDateCreation().plusMinutes(15);
 
             log.info("La réservation provisoire n°{} créée à {} a été annulée automatiquement (expirée à {}).",
                     r.getId(),

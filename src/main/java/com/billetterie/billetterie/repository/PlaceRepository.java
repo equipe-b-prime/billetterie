@@ -21,10 +21,12 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
         SELECT p FROM Place p
         WHERE p.salle.id = :salleId
           AND p.categorie.id = :categorieId
-          AND p.id NOT IN (
-              SELECT b.place.id FROM Billet b
-              WHERE b.reservation.evenement.id = :evenementId
+          AND NOT EXISTS (
+              SELECT 1 FROM Billet b
+              WHERE b.place.id = p.id
+                AND b.reservation.evenement.id = :evenementId
                 AND b.reservation.dateAnnulation IS NULL
+                AND b.reservation.statut.libelle IN ('PROVISOIRE', 'PAYEE')
           )
         ORDER BY p.rang ASC, p.numero ASC
     """)

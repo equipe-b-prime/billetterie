@@ -95,15 +95,19 @@ import java.util.function.ToIntFunction;
      * @param evenement l'entite a transfomer.
      * @return EvenementResponseDto le Dto de retour.
      */
-        public  EvenementResponseDto toDtoSansSalle(Evenement evenement) {
-            return EvenementResponseDto.builder()
-                    .id(evenement.getId())
-                    .titre(evenement.getTitre())
-                    .description(evenement.getDescription())
-                    .horaire(evenement.getHoraire())
-                    .placementLibre(evenement.getPlacementLibre())
-                    .build();
-        }
+    public EvenementResponseDto toDtoSansSalle(Evenement evenement) {
+        boolean estAVenir = evenement.getHoraire() != null
+                && evenement.getHoraire().isAfter(LocalDateTime.now());
+
+        return EvenementResponseDto.builder()
+                .id(evenement.getId())
+                .titre(evenement.getTitre())
+                .description(evenement.getDescription())
+                .horaire(evenement.getHoraire())
+                .placementLibre(evenement.getPlacementLibre())
+                .estAVenir(estAVenir)
+                .build();
+    }
         /**
          * Convertit les données d'une requête en entité événement.
          *

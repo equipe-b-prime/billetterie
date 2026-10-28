@@ -15,7 +15,8 @@ import lombok.*;
 @Table(name = "client" ,uniqueConstraints = {
         @UniqueConstraint(columnNames = {"nom","prenom"}
         )},indexes = {
-        @Index(name = "idx_client_nom_prenom", columnList = "nom, prenom")
+        @Index(name = "idx_client_nom_prenom", columnList = "nom, prenom"),
+        @Index(name = "idx_client_mail", columnList = "email")
 })
 public class Client {
     @Id

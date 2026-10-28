@@ -23,4 +23,5 @@
         private LocalDateTime horaire;
         private Boolean placementLibre;
         private SalleResponseDto salle;
+        private boolean estAVenir;
     }
