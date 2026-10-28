@@ -272,11 +272,28 @@ to Les détails de l'événement supprimé.
     public RemplissageResponseDto calculerTauxRemplissage(Long evenementId) {
         verifierExistenceEvenement(evenementId);
 
+        Salle salle = salleRepository.findById(evenementRepository.findById(evenementId).get().getSalle().getId())
+                .orElseThrow(() -> new NotFoundException("Salle introuvable"));
+
+        if (salle.getCapacite() == 0) {
+            throw new IllegalStateException("La salle associée à cet événement ne possède aucune place.");
+        }
+
         List<RemplissageCategorieDto> detailsParCategorie = chargerDetailsParCategorie(evenementId);
 
-        // Correction des méthodes références Lombok (getters)
         int totalPlaces = calculerTotal(detailsParCategorie, RemplissageCategorieDto::getTotalPlaces);
-        validerSalleNonVide(totalPlaces);
+
+        if (totalPlaces == 0) {
+            // Cas limite : événement sans réservation → retourne 0%
+            return new RemplissageResponseDto(
+                    evenementId,
+                    0,
+                    0,
+                    0,
+                    0.0,
+                    List.of()
+            );
+        }
 
         int totalProvisoires = calculerTotal(detailsParCategorie, RemplissageCategorieDto::getPlacesProvisoires);
         int totalPayees = calculerTotal(detailsParCategorie, RemplissageCategorieDto::getPlacesPayees);
