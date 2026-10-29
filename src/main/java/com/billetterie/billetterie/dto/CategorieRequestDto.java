@@ -1,18 +1,27 @@
 package com.billetterie.billetterie.dto;
 
+import com.billetterie.billetterie.service.AbstractClean;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 /**
  * Requête de création ou de modification d'une catégorie.
  */
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Getter
 @Setter
-public class CategorieRequestDto implements RequestDto {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class CategorieRequestDto extends AbstractClean implements RequestDto {
     @NotBlank(message = "Le nom ne peut pas être vide")
     private String nom;
     private String description;
+
+    public void setNom(String nom) {
+        this.nom = cleanText(nom);
+    }
+
+    public void setDescription(String description) {
+        this.description = cleanText(description);
+    }
 }

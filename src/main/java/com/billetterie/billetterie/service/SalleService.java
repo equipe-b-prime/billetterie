@@ -94,6 +94,9 @@ public class SalleService extends AbstractCrudService {
     @Transactional
     public ResponseDto create(RequestDto requestDto) {
         SalleRequestDto salleRequest = (SalleRequestDto) requestDto;
+        salleRequest.setNom(salleRequest.getNom());
+        salleRequest.setVille(salleRequest.getVille());
+        salleRequest.setAdresse(salleRequest.getAdresse());
         if(salleRepository.existsByNomAndVille(salleRequest.getNom(), salleRequest.getVille())) {
             throw new DoublonRessourceException("Une salle nommée '" + salleRequest.getNom() + "' existe déjà à "
                     + salleRequest.getVille());
@@ -112,6 +115,9 @@ public class SalleService extends AbstractCrudService {
     @Transactional
     public ResponseDto update(Long id, RequestDto requestDto) {
         SalleRequestDto salleRequest = (SalleRequestDto) requestDto;
+        salleRequest.setNom(salleRequest.getNom());
+        salleRequest.setVille(salleRequest.getVille());
+        salleRequest.setAdresse(salleRequest.getAdresse());
         Salle salle = salleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
         boolean nomOuVilleModifie = !salle.getNom().equalsIgnoreCase(salleRequest.getNom())
@@ -234,4 +240,3 @@ public class SalleService extends AbstractCrudService {
                 .toList();
         }
 }
-

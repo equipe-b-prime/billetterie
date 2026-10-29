@@ -1,5 +1,6 @@
 package com.billetterie.billetterie.dto;
 
+import com.billetterie.billetterie.service.AbstractClean;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -12,7 +13,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SalleRequestDto implements RequestDto {
+public class SalleRequestDto extends AbstractClean implements RequestDto {
     @NotBlank(message = "Le nom est obligatoire")
     private String nom;
     @NotBlank(message = "La ville est obligatoire")
@@ -21,4 +22,16 @@ public class SalleRequestDto implements RequestDto {
     private int capacite;
     @NotBlank(message = "L'adresse est obligatoire")
     private String adresse;
+
+    public void setNom(String nom) {
+        this.nom = cleanText(nom);
+    }
+
+    public void setVille(String ville) {
+        this.ville = cleanText(ville);
+    }
+
+    public void setAdresse(String adresse) {
+        this.adresse = cleanText(adresse);
+    }
 }

@@ -134,6 +134,8 @@ import java.util.function.ToIntFunction;
     @Override
     public ResponseDto create(RequestDto requestDto) {
         EvenementRequestDto evenementRequest = (EvenementRequestDto) requestDto;
+        evenementRequest.setTitre(evenementRequest.getTitre());
+        evenementRequest.setDescription(evenementRequest.getDescription());
         Salle salle = salleRepository.findById(evenementRequest.getSalleId())
                 .orElseThrow(() -> new NotFoundException("Salle non trouvée"));
         if (evenementRequest.getHoraire().isBefore(LocalDateTime.now())) {
@@ -157,6 +159,8 @@ import java.util.function.ToIntFunction;
 
     public ResponseDto update(Long id, RequestDto requestDto) {
         EvenementRequestDto evenementRequest = (EvenementRequestDto) requestDto;
+        evenementRequest.setTitre(evenementRequest.getTitre());
+        evenementRequest.setDescription(evenementRequest.getDescription());
 
         Evenement evenement = evenementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
@@ -354,3 +358,4 @@ to Les détails de l'événement supprimé.
         return Math.round(pourcentage * 100.0) / 100.0;
     }
 }
+

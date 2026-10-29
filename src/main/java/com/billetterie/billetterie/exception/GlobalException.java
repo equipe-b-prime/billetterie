@@ -4,6 +4,7 @@ import com.billetterie.billetterie.utils.response.Response;
 import com.billetterie.billetterie.utils.response.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -161,5 +162,24 @@ public class GlobalException {
         reponse.setHasError(true);
         reponse.setStatus(new Status(HttpStatus.CONFLICT.value(), ex.getMessage()));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
+    }
+
+    /**
+     * Gère les erreurs de désérialisation du corps de la requête JSON
+     * (ex. syntaxe JSON invalide, caractère non guillemeté, ou type incompatible dans le body).
+     *
+     * @param ex L'exception de lecture du message HTTP.
+     * @return ResponseEntity décrivant l'erreur de formatage JSON avec le code HTTP 400 BAD_REQUEST.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Response<String>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        Response<String> response = new Response<>(Collections.emptyList());
+        response.setNombre(0L);
+        response.setHasError(true);
+        response.setStatus(new Status(
+                HttpStatus.BAD_REQUEST.value(),
+                "Les données envoyées sont incorrectes ou mal formatées."));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

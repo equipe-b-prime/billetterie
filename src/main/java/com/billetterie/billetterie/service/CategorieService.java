@@ -69,8 +69,8 @@ public class CategorieService extends AbstractCrudService {
     @Override
     public ResponseDto create(RequestDto request) {
         CategorieRequestDto categorieRequest = (CategorieRequestDto) request;
-        categorieRequest.setNom(categorieRequest.getNom().trim());
-        categorieRequest.setDescription(categorieRequest.getDescription().trim());
+        categorieRequest.setNom(categorieRequest.getNom());
+        categorieRequest.setDescription(categorieRequest.getDescription());
         Categorie categorieSauvegardee = categorieRepository.save(toEntity(categorieRequest));
         return toDto(categorieSauvegardee);
     }
@@ -85,10 +85,12 @@ public class CategorieService extends AbstractCrudService {
     @Override
     public ResponseDto update(Long id, RequestDto requestDto) {
         CategorieRequestDto categorieRequest = (CategorieRequestDto) requestDto;
+        categorieRequest.setNom(categorieRequest.getNom());
+        categorieRequest.setDescription(categorieRequest.getDescription());
         Categorie categorie = categorieRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
-        categorie.setLibelle(categorieRequest.getNom().trim());
-        categorie.setDescription(categorieRequest.getDescription().trim());
+        categorie.setLibelle(categorieRequest.getNom());
+        categorie.setDescription(categorieRequest.getDescription());
         categorieRepository.save(categorie);
         return toDto(categorie);
     }

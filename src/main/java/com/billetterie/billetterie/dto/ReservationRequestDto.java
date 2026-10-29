@@ -1,5 +1,6 @@
 package com.billetterie.billetterie.dto;
 
+import com.billetterie.billetterie.service.AbstractClean;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -17,7 +18,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservationRequestDto implements RequestDto {
+public class ReservationRequestDto extends AbstractClean implements RequestDto {
     private Long id;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateCreation;
