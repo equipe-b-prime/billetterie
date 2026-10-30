@@ -97,7 +97,7 @@ public class GlobalException {
     }
 
     /**
-     * Gère les doublons de ressource (ex. unicité titre/horaire ou email).
+     * Gère les erreurs de doublons de ressource (ex. unicité titre/horaire ou email).
      *
      * Code HTTP : 409 CONFLICT
      *
@@ -164,6 +164,7 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(reponse);
     }
 
+
     /**
      * Gère les erreurs de désérialisation du corps de la requête JSON
      * (ex. syntaxe JSON invalide, caractère non guillemeté, ou type incompatible dans le body).
@@ -181,5 +182,15 @@ public class GlobalException {
                 "Les données envoyées sont incorrectes ou mal formatées."));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Response<String>> handleGenericException(Exception ex) {
+        Response<String> reponse = new Response<>(Collections.emptyList());
+        reponse.setNombre(0L);
+        reponse.setHasError(true);
+        reponse.setStatus(new Status(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Une erreur interne est survenue"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(reponse);
     }
 }
