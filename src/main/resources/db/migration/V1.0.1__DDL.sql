@@ -2,11 +2,21 @@
 -- V1.0.1__DDL.sql : CRÉATION DES TABLES, CONTRAINTES, INDEX ET VUES SQL
 -- =========================================================================
 
--- Nettoyage préalable des vues pour permettre les modifications de colonnes si les tables existent déjà
-DROP VIEW IF EXISTS v_evenement_details CASCADE;
-DROP VIEW IF EXISTS v_client_stats CASCADE;
-DROP VIEW IF EXISTS vue_places_libres CASCADE;
-DROP VIEW IF EXISTS v_evenement_remplissage_categorie CASCADE;
+-- Nettoyage préalable des vues (ou anciennes tables créées par Hibernate)
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (
+        SELECT tablename, 'TABLE' AS type FROM pg_tables WHERE schemaname = 'public' 
+            AND tablename IN ('v_evenement_details', 'v_client_stats', 'vue_places_libres', 'v_evenement_remplissage_categorie')
+        UNION ALL
+        SELECT viewname AS tablename, 'VIEW' AS type FROM pg_views WHERE schemaname = 'public' 
+            AND viewname IN ('v_evenement_details', 'v_client_stats', 'vue_places_libres', 'v_evenement_remplissage_categorie')
+    ) LOOP
+        EXECUTE 'DROP ' || r.type || ' IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END $$;
 
 -- =========================================================================
 -- 1. CRÉATION DES TABLES
