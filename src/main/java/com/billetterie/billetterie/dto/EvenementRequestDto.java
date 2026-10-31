@@ -2,6 +2,7 @@ package com.billetterie.billetterie.dto;
 
 import com.billetterie.billetterie.service.AbstractClean;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -28,10 +29,12 @@ public class EvenementRequestDto extends AbstractClean implements RequestDto {
     @NotNull(message = "La salle est obligatoire")
     private Long salleId;
 
+    @JsonSetter
     public void setTitre(String titre) {
         this.titre = cleanText(titre);
     }
 
+    @JsonSetter
     public void setDescription(String description) {
         this.description = cleanText(description);
     }

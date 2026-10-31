@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "056b0a6c-f319-4643-9dc4-ca7aff2cb31e",
+    "_postman_id": "9c7eda71-dafa-42c9-9fc1-8306db8c140b",
     "name": "ZKANTAPI — Billetterie (Niveaux 1 à 4)",
-    "description": "Collection Postman complète pour le Projet d'API REST de Billetterie de spectacle. Supporte le test en ligne (Render + Neon) et en local (PostgreSQL) via la variable baseUrl.",
+    "description": "Collection Postman 100% alignée avec les DTOs Java et Endpoints Spring Boot de l'API de Billetterie. Supporte le test En Ligne (Render + Neon) et Local via la variable baseUrl.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -36,12 +36,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"nom\": \"salle rouge\",\n    \"ville\": \"abidjan\",\n    \"capacite\": 3,\n    \"adresse\": \"cocody danga\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"nom\": \"Palais des Congr\\u00e8s\",\n    \"ville\": \"Abidjan\",\n    \"adresse\": \"Plateau Boulevard Carde\",\n    \"capacite\": 1500\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/salles",
@@ -51,13 +46,11 @@
                   "path": [
                     "salles"
                   ]
-                },
-                "description": "Generated from cURL: curl -X POST {{loc}}/salle -H \"Content-Type: application/json\" -d '{\"nom\":\"Olympia\",\"ville\":\"Paris\",\"capacite\":200}'"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[POST] Créer une salle (Doublon refusé)",
+              "name": "[POST] Créer une salle (Doublon refusé 409)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -68,12 +61,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"nom\":\"Olympia\",\"ville\":\"Paris\",\"capacite\":150}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"nom\": \"Palais des Congr\\u00e8s\",\n    \"ville\": \"Abidjan\",\n    \"adresse\": \"Plateau Boulevard Carde\",\n    \"capacite\": 1200\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/salles",
@@ -83,10 +71,8 @@
                   "path": [
                     "salles"
                   ]
-                },
-                "description": "Generated from cURL: curl -X POST {{loc}}/salle -H \"Content-Type: application/json\" -d '{\"nom\":\"Olympia\",\"ville\":\"Paris\",\"capacite\":150}'"
-              },
-              "response": []
+                }
+              }
             },
             {
               "name": "[GET] Lister les salles (Pagination page 0)",
@@ -111,42 +97,8 @@
                       "value": "10"
                     }
                   ]
-                },
-                "description": "Generated from cURL: curl -X GET \"{{loc}}/salle?page=0&size=10\""
-              },
-              "response": []
-            },
-            {
-              "name": "[POST] Créer une salle (Doublon refusé)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\"nom\":\"Olympia\",\"ville\":\"Paris\",\"capacite\":150}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/salles",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "salles"
-                  ]
-                },
-                "description": "Generated from cURL: curl -X POST {{loc}}/salle -H \"Content-Type: application/json\" -d '{\"nom\":\"Olympia\",\"ville\":\"Paris\",\"capacite\":150}'"
-              },
-              "response": []
+                }
+              }
             },
             {
               "name": "[GET] Détail d'une salle (Par ID)",
@@ -162,13 +114,11 @@
                     "salles",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X GET {{loc}}/salle/1"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[PUT] Modifier une salle (Mise à jour capacité)",
+              "name": "[PUT] Modifier une salle (Mise à jour capacité et nom)",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -179,12 +129,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"nom\": \"salle rouge\",\n    \"ville\": \"abidjan\",\n    \"capacite\": 3,\n    \"adresse\": \"cocody danga\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"nom\": \"Salle_1 Modifi\\u00e9e\",\n    \"ville\": \"Lyon\",\n    \"adresse\": \"Adresse Modifi\\u00e9e\",\n    \"capacite\": 350\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/salles/1",
@@ -195,13 +140,11 @@
                     "salles",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X PUT {{loc}}/salle/1 -H \"Content-Type: application/json\" -d '{\"nom\":\"Olympia\",\"ville\":\"Paris\",\"capacite\":300}'"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[DELETE] Supprimer une salle (Refusé si places/événements)",
+              "name": "[DELETE] Supprimer une salle (Refusé 409 si dépendances)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -214,10 +157,8 @@
                     "salles",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X DELETE {{loc}}/salle/1"
-              },
-              "response": []
+                }
+              }
             }
           ]
         },
@@ -225,7 +166,7 @@
           "name": "02_places",
           "item": [
             {
-              "name": "[POST] Créer une place (Nouvelle place Orchestre)",
+              "name": "[POST] Créer une place (Nouvelle place valide)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -236,12 +177,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"rang\": 1,\n    \"numero\": 1,\n    \"categorieId\": \"1\",\n    \"salleId\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"rang\": 10,\n    \"numero\": 88,\n    \"salleId\": 1,\n    \"categorieId\": 2\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/places",
@@ -251,13 +187,11 @@
                   "path": [
                     "places"
                   ]
-                },
-                "description": "Generated from cURL: curl -X POST {{loc}}/place -H \"Content-Type: application/json\" -d '{\"rang\":1,\"numero\":1,\"categorieLibelle\":\"Orchestre\",\"salleId\":1}'"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[POST] Créer une place (Doublon rang/numéro refusé)",
+              "name": "[POST] Créer une place (Doublon rang/numéro refusé 409)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -268,12 +202,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"rang\":1,\"numero\":1,\"categorieLibelle\":\"Balcon\",\"salleId\":1}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"rang\": 1,\n    \"numero\": 1,\n    \"salleId\": 1,\n    \"categorieId\": 2\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/places",
@@ -283,10 +212,8 @@
                   "path": [
                     "places"
                   ]
-                },
-                "description": "Generated from cURL: curl -X POST {{loc}}/place -H \"Content-Type: application/json\" -d '{\"rang\":1,\"numero\":1,\"categorieLibelle\":\"Balcon\",\"salleId\":1}'"
-              },
-              "response": []
+                }
+              }
             },
             {
               "name": "[GET] Lister les places (Triées par rang et numéro)",
@@ -294,17 +221,25 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/places",
+                  "raw": "{{baseUrl}}/places?page=0&size=10",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "places"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
                   ]
-                },
-                "description": "Generated from cURL: curl -X GET \"{{loc}}/place?page=0&size=10\""
-              },
-              "response": []
+                }
+              }
             },
             {
               "name": "[GET] Détail d'une place (Par ID)",
@@ -320,13 +255,11 @@
                     "places",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X GET {{loc}}/place/1"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[PUT] Modifier une place (Changement de catégorie)",
+              "name": "[PUT] Modifier une place (Mise à jour complète valide)",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -337,12 +270,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"categorieLibelle\":\"Balcon\"}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"rang\": 1,\n    \"numero\": 1,\n    \"salleId\": 1,\n    \"categorieId\": 3\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/places/1",
@@ -353,13 +281,11 @@
                     "places",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X PUT {{loc}}/place/1 -H \"Content-Type: application/json\" -d '{\"categorieLibelle\":\"Balcon\"}'"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[DELETE] Supprimer une place (Refusée si réservée)",
+              "name": "[DELETE] Supprimer une place (Refusée 409 si réservée)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -372,10 +298,8 @@
                     "places",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X DELETE {{loc}}/place/1"
-              },
-              "response": []
+                }
+              }
             }
           ]
         },
@@ -394,12 +318,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"titre\": \"Concedrt Jazz\",\n    \"horaire\": \"2026-11-01 20:00:00\",\n    \"placementLibre\": false,\n    \"salleId\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"titre\": \"Concert Symphonique 2026\",\n    \"description\": \"Grand concert orchestral\",\n    \"horaire\": \"2026-12-25 20:00:00\",\n    \"placementLibre\": false,\n    \"salleId\": 1\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/evenements",
@@ -409,13 +328,11 @@
                   "path": [
                     "evenements"
                   ]
-                },
-                "description": "Generated from cURL: curl -X POST {{loc}}/evenement -H \"Content-Type: application/json\" -d '{\"titre\":\"Concert Jazz\",\"horaire\":\"2026-11-01T20:00:00\",\"placementLibre\":false,\"salleId\":1}'"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[POST] Créer un événement (Date passée refusée)",
+              "name": "[POST] Créer un événement (Date passée refusée 400)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -426,12 +343,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"titre\": \"Passé\",\n    \"horaire\": \"2026-10-01 20:00:00\",\n    \"placementLibre\": false,\n    \"salleId\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"titre\": \"Concert Pass\\u00e9 Refus\\u00e9\",\n    \"description\": \"Ne doit pas \\u00eatre accept\\u00e9\",\n    \"horaire\": \"2020-01-01 10:00:00\",\n    \"placementLibre\": false,\n    \"salleId\": 1\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/evenements",
@@ -441,10 +353,8 @@
                   "path": [
                     "evenements"
                   ]
-                },
-                "description": "Generated from cURL: curl -X POST {{loc}}/evenement -H \"Content-Type: application/json\" -d '{\"titre\":\"Passé\",\"horaire\":\"2026-10-01T20:00:00\",\"placementLibre\":false,\"salleId\":1}'"
-              },
-              "response": []
+                }
+              }
             },
             {
               "name": "[GET] Lister les événements (Triés par date croissante)",
@@ -452,7 +362,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/evenements?page=0&size=1",
+                  "raw": "{{baseUrl}}/evenements?page=0&size=10",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -466,13 +376,11 @@
                     },
                     {
                       "key": "size",
-                      "value": "1"
+                      "value": "10"
                     }
                   ]
-                },
-                "description": "Generated from cURL: curl -X GET \"{{loc}}/evenement?page=0&size=10\""
-              },
-              "response": []
+                }
+              }
             },
             {
               "name": "[GET] Détail d'un événement (Par ID)",
@@ -480,18 +388,16 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/evenements/6",
+                  "raw": "{{baseUrl}}/evenements/1",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "evenements",
-                    "6"
+                    "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X GET {{loc}}/evenement/1"
-              },
-              "response": []
+                }
+              }
             },
             {
               "name": "[PUT] Reporter un événement (Nouvelle date future)",
@@ -505,29 +411,22 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"titre\": \"Concert Jazz\",\n    \"horaire\": \"2026-11-15 20:00:00\",\n    \"placementLibre\": false,\n    \"salleId\": 6\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"titre\": \"\\u00c9v\\u00e9nement_1 Report\\u00e9\",\n    \"description\": \"Nouvelle programmation\",\n    \"horaire\": \"2027-01-20 20:00:00\",\n    \"placementLibre\": false,\n    \"salleId\": 1\n}"
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/evenements/6",
+                  "raw": "{{baseUrl}}/evenements/1",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "evenements",
-                    "6"
+                    "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X PUT {{loc}}/evenement/1 -H \"Content-Type: application/json\" -d '{\"titre\":\"Concert Jazz\",\"horaire\":\"2026-11-15T20:00:00\",\"placementLibre\":false,\"salleId\":1}'"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[DELETE] Supprimer un événement (Refusé si réservations)",
+              "name": "[DELETE] Supprimer un événement (Refusé 409 si réservations)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -540,10 +439,8 @@
                     "evenements",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X DELETE {{loc}}/evenement/1"
-              },
-              "response": []
+                }
+              }
             }
           ]
         },
@@ -551,7 +448,7 @@
           "name": "04_reservations",
           "item": [
             {
-              "name": "[POST] Créer une réservation (Statut PROVISOIRE)",
+              "name": "[POST] Créer une réservation (Statut initial PROVISOIRE)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -562,12 +459,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"clientId\": 1,\n    \"evenementId\": 6,\n    \"statutId\": 1,\n    \"montantTotal\": 100.00,\n    \"lignes\": [\n      {\"categorieId\": 3, \"quantite\": 1}\n    ]\n  }",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"clientId\": 1,\n    \"evenementId\": 1,\n    \"statutId\": 1,\n    \"montantTotal\": 100.0,\n    \"lignes\": [\n        {\n            \"categorieId\": 2,\n            \"quantite\": 1\n        }\n    ]\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/reservations",
@@ -576,40 +468,17 @@
                   ],
                   "path": [
                     "reservations"
-                  ],
-                  "query": [
-                    {
-                      "key": "size",
-                      "value": "1",
-                      "disabled": true
-                    },
-                    {
-                      "key": "page",
-                      "value": "0",
-                      "disabled": true
-                    }
                   ]
-                },
-                "description": "Generated from cURL: curl -X POST {{loc}}/reservation -H \"Content-Type: application/json\" -d '{\"clientNom\":\"Dupont\",\"clientEmail\":\"dupont@exemple.com\",\"evenementId\":1,\"placeId\":1}'"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[GET] Lister les réservations (Triées date décroissante)",
+              "name": "[GET] Lister les réservations (Paginées et triées)",
               "request": {
                 "method": "GET",
                 "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"dateAnnulation\": null,\n    \"clientId\": 1,\n    \"montantTotal\": 300.00,\n    \"montantRembourse\": null,\n    \"evenementId\": 1,\n    \"statutId\": 2\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
                 "url": {
-                  "raw": "{{baseUrl}}/reservations?size=100&page=6",
+                  "raw": "{{baseUrl}}/reservations?page=0&size=10",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -618,18 +487,16 @@
                   ],
                   "query": [
                     {
-                      "key": "size",
-                      "value": "100"
+                      "key": "page",
+                      "value": "0"
                     },
                     {
-                      "key": "page",
-                      "value": "6"
+                      "key": "size",
+                      "value": "10"
                     }
                   ]
-                },
-                "description": "Generated from cURL: curl -X GET \"{{loc}}/reservation?page=0&size=10\""
-              },
-              "response": []
+                }
+              }
             },
             {
               "name": "[GET] Détail d'une réservation (Par ID)",
@@ -645,13 +512,11 @@
                     "reservations",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X GET {{loc}}/reservation/1"
-              },
-              "response": []
+                }
+              }
             },
             {
-              "name": "[PUT] Modifier une réservation (Mise à jour client)",
+              "name": "[PUT] Modifier une réservation",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -662,12 +527,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"clientNom\":\"Martin\",\"clientEmail\":\"martin@exemple.com\",\"statutId\":1}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n    \"clientId\": 1,\n    \"evenementId\": 1,\n    \"statutId\": 1,\n    \"montantTotal\": 100.0,\n    \"lignes\": [\n        {\n            \"categorieId\": 2,\n            \"quantite\": 1\n        }\n    ]\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/reservations/1",
@@ -678,10 +538,8 @@
                     "reservations",
                     "1"
                   ]
-                },
-                "description": "Generated from cURL: curl -X PUT {{loc}}/reservation/1 -H \"Content-Type: application/json\" -d '{\"clientNom\":\"Martin\",\"clientEmail\":\"martin@exemple.com\",\"statutId\":1}'"
-              },
-              "response": []
+                }
+              }
             }
           ]
         }
@@ -691,7 +549,7 @@
       "name": "NIVEAU 2 — CONSULTATION ET RECHERCHE (F5 à F10)",
       "item": [
         {
-          "name": "[GET] Lister les places d'une salle (Liste complète)",
+          "name": "[GET] Lister les places d'une salle (F5 - Salle 1)",
           "request": {
             "method": "GET",
             "header": [],
@@ -705,18 +563,16 @@
                 "1",
                 "places"
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/salle/1/places\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Filtrer les places par catégorie (Catégorie BALCON)",
+          "name": "[GET] Filtrer les places d'une salle par catégorie (F6 - Catégorie OR)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/salles/1/places?categorie=or",
+              "raw": "{{baseUrl}}/salles/1/places?categorie=OR",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -728,16 +584,14 @@
               "query": [
                 {
                   "key": "categorie",
-                  "value": "or"
+                  "value": "OR"
                 }
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/salle/1/places?categorie=BALCON\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Filtrer les places par catégorie (Sans filtre - toutes)",
+          "name": "[GET] Filtrer les places par catégorie (F6 - Sans filtre toutes)",
           "request": {
             "method": "GET",
             "header": [],
@@ -751,13 +605,11 @@
                 "1",
                 "places"
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/salle/1/places\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Lister les événements d'une salle (Par salle ID)",
+          "name": "[GET] Lister la programmation des événements d'une salle (F7 - Salle 1)",
           "request": {
             "method": "GET",
             "header": [],
@@ -771,54 +623,51 @@
                 "1",
                 "evenements"
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/salle/1/evenements\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Rechercher événements sur période (Novembre 2026)",
+          "name": "[GET] Rechercher événements sur période (F8 - Endpoint /recherche)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/evenements?du=01-11-2026 00:00:00&au=30-11-2026 23:59:59&size=1&page=0",
+              "raw": "{{baseUrl}}/evenements/recherche?du=01-01-2026%2000:00:00&au=31-12-2027%2023:59:59&page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "evenements"
+                "evenements",
+                "recherche"
               ],
               "query": [
                 {
                   "key": "du",
-                  "value": "01-11-2026 00:00:00"
+                  "value": "01-01-2026%2000:00:00"
                 },
                 {
                   "key": "au",
-                  "value": "30-11-2026 23:59:59"
-                },
-                {
-                  "key": "size",
-                  "value": "1"
+                  "value": "31-12-2027%2023:59:59"
                 },
                 {
                   "key": "page",
                   "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
                 }
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/evenements?du=2026-11-01&au=2026-11-30\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Rechercher événements sur période (Borne du seule)",
+          "name": "[GET] Rechercher événements avec filtres temporels optionnels (F8)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/evenements?du=30-11-2026 23:59:59&size=1&page=0",
+              "raw": "{{baseUrl}}/evenements?du=01-01-2026%2000:00:00&au=31-12-2027%2023:59:59&page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -828,29 +677,31 @@
               "query": [
                 {
                   "key": "du",
-                  "value": "30-11-2026 23:59:59"
+                  "value": "01-01-2026%2000:00:00"
                 },
                 {
-                  "key": "size",
-                  "value": "1"
+                  "key": "au",
+                  "value": "31-12-2027%2023:59:59"
                 },
                 {
                   "key": "page",
                   "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
                 }
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/evenements?du=2026-11-01\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Paginer les réservations (Page 0 triée par date)",
+          "name": "[GET] Paginer les réservations (F9 - Page 0 triée)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/reservations?page=0&size=100",
+              "raw": "{{baseUrl}}/reservations?page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -863,22 +714,15 @@
                   "value": "0"
                 },
                 {
-                  "key": "sort",
-                  "value": "dateCreation,desccc",
-                  "disabled": true
-                },
-                {
                   "key": "size",
-                  "value": "100"
+                  "value": "10"
                 }
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/reservations?page=0&size=20&sort=dateCreation,desc\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Paginer les réservations (Première page défaut)",
+          "name": "[GET] Paginer les réservations (F9 - Première page défaut)",
           "request": {
             "method": "GET",
             "header": [],
@@ -890,18 +734,16 @@
               "path": [
                 "reservations"
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/reservations?page=0\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Rechercher réservations par email (Email exact)",
+          "name": "[GET] Rechercher réservations par email (F10 - Email exact)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/reservations?email=kante@email.com",
+              "raw": "{{baseUrl}}/reservations?email=client@exemple.ci",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -911,31 +753,33 @@
               "query": [
                 {
                   "key": "email",
-                  "value": "kante@email.com"
+                  "value": "client@exemple.ci"
                 }
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/reservations?email=client@exemple.ci\""
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Rechercher réservations par email (Casse ignorée)",
+          "name": "[GET] Rechercher réservations par email (F10 - Insensible à la casse)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/reservations",
+              "raw": "{{baseUrl}}/reservations?email=CLIENT@EXEMPLE.CI",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reservations"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "CLIENT@EXEMPLE.CI"
+                }
               ]
-            },
-            "description": "Generated from cURL: curl -X GET \"{{loc}}/reservations?email=CLIENT@EXEMPLE.CI\""
-          },
-          "response": []
+            }
+          }
         }
       ]
     },
@@ -943,7 +787,7 @@
       "name": "NIVEAU 3 — RÈGLES MÉTIER (F11 à F16)",
       "item": [
         {
-          "name": "[POST] Réserver une place (Double réservation refusée)",
+          "name": "[POST] Réserver une place (F11 - Places insuffisantes refusé 409)",
           "request": {
             "method": "POST",
             "header": [
@@ -954,12 +798,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"clientId\": 1,\n    \"evenementId\": 3,\n    \"statutId\": 1,\n    \"montantTotal\": 100.00,\n    \"lignes\": [\n      {\"categorieId\": 3, \"quantite\": 1}\n    ]\n  }",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n    \"clientId\": 1,\n    \"evenementId\": 1,\n    \"statutId\": 1,\n    \"montantTotal\": 50000.0,\n    \"lignes\": [\n        {\n            \"categorieId\": 2,\n            \"quantite\": 99999\n        }\n    ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/reservations",
@@ -969,13 +808,11 @@
               "path": [
                 "reservations"
               ]
-            },
-            "description": "Generated from cURL: curl -X POST {{loc}}/reservation -H \"Content-Type: application/json\" -d '{\"clientNom\":\"A\",\"clientEmail\":\"a@x.com\",\"evenementId\":1,\"placeId\":1}'"
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[POST] Réserver une place (Place hors salle événement)",
+          "name": "[POST] Réserver une place (F12 - Catégorie introuvable refusé 404)",
           "request": {
             "method": "POST",
             "header": [
@@ -986,12 +823,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"clientNom\":\"A\",\"clientEmail\":\"a@x.com\",\"evenementId\":1,\"placeId\":12}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n    \"clientId\": 1,\n    \"evenementId\": 1,\n    \"statutId\": 1,\n    \"montantTotal\": 100.0,\n    \"lignes\": [\n        {\n            \"categorieId\": 999999,\n            \"quantite\": 1\n        }\n    ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/reservations",
@@ -1001,13 +833,11 @@
               "path": [
                 "reservations"
               ]
-            },
-            "description": "Generated from cURL: curl -X POST {{loc}}/reservation -H \"Content-Type: application/json\" -d '{\"clientNom\":\"A\",\"clientEmail\":\"a@x.com\",\"evenementId\":1,\"placeId\":12}'"
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[POST] Réserver une place (Événement passé refusé)",
+          "name": "[POST] Réserver une place (F13 - Événement passé refusé)",
           "request": {
             "method": "POST",
             "header": [
@@ -1018,12 +848,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"clientId\": 1, \"statutId\": 1, \"montantTotal\": 300, \"evenementId\": 1, \"lignes\": [{\"categorieId\": 1, \"quantite\": 1}]}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n    \"clientId\": 1,\n    \"evenementId\": 999,\n    \"statutId\": 1,\n    \"montantTotal\": 100.0,\n    \"lignes\": [\n        {\n            \"categorieId\": 1,\n            \"quantite\": 1\n        }\n    ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/reservations",
@@ -1033,70 +858,81 @@
               "path": [
                 "reservations"
               ]
-            },
-            "description": "Generated from cURL: curl -X POST {{loc}}/reservation -H \"Content-Type: application/json\" -d '{\"clientNom\":\"A\",\"clientEmail\":\"a@x.com\",\"evenementId\":999,\"placeId\":1}'"
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[POST] Confirmer le paiement (PROVISOIRE → PAYEE)",
+          "name": "[POST] Confirmer le paiement (F14 - PROVISOIRE ➔ PAYEE sur ID=1)",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
-              "raw": "{{baseUrl}}/reservations/8549680/paiement",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "reservations",
-                "8549680",
-                "paiement"
-              ]
-            },
-            "description": "Generated from cURL: curl -X POST {{loc}}/reservation/1/paiement"
-          },
-          "response": []
-        },
-        {
-          "name": "[POST] Annuler une réservation (Avec remboursement)",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/reservations/8549680/annulation",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "reservations",
-                "8549680",
-                "annulation"
-              ]
-            },
-            "description": "Generated from cURL: curl -X POST {{loc}}/reservation/1/annulation"
-          },
-          "response": []
-        },
-        {
-          "name": "[POST] Libérer réservations expirées (Provisoires expirées)",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/reservations/1/liberation",
+              "raw": "{{baseUrl}}/reservations/1/paiement",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reservations",
                 "1",
-                "liberation"
+                "paiement"
               ]
-            },
-            "description": "Generated from cURL: curl -X POST {{loc}}/reservation/1/liberation"
-          },
-          "response": []
+            }
+          }
+        },
+        {
+          "name": "[POST] Annuler une réservation (F15 - Remboursement automatique sur ID=1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/1/annulation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations",
+                "1",
+                "annulation"
+              ]
+            }
+          }
+        },
+        {
+          "name": "[GET] Libérer réservations expirées (F16 - Information tâche @Scheduled)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "F16 est une tâche planifiée en arrière-plan (@Scheduled) dans Spring Boot qui s'exécute automatiquement chaque minute pour libérer les réservations provisoires expirées. Elle ne nécessite pas d'appel HTTP direct.",
+            "url": {
+              "raw": "{{baseUrl}}/reservations?page=0&size=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                }
+              ]
+            }
+          }
         }
       ]
     },
@@ -1104,7 +940,7 @@
       "name": "NIVEAU 4 — LA RESTITUTION (F17 à F19)",
       "item": [
         {
-          "name": "[GET] Afficher les places libres (D'un événement)",
+          "name": "[GET] Afficher les places libres par catégorie (F17 - Événement 1)",
           "request": {
             "method": "GET",
             "header": [],
@@ -1118,13 +954,11 @@
                 "1",
                 "places-libres"
               ]
-            },
-            "description": "Generated from cURL: curl --request GET '{{loc}}/evenement/1/places-libres'"
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Calculer le taux de remplissage (D'un événement)",
+          "name": "[GET] Calculer le taux de remplissage (F18 - Événement 1)",
           "request": {
             "method": "GET",
             "header": [],
@@ -1138,13 +972,11 @@
                 "1",
                 "remplissage"
               ]
-            },
-            "description": "Generated from cURL: curl --request GET '{{loc}}/evenement/1/remplissage'"
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Exporter les réservations CSV (Annulées exclues)",
+          "name": "[GET] Exporter les réservations CSV (F19 - Annulées exclues)",
           "request": {
             "method": "GET",
             "header": [],
@@ -1159,18 +991,16 @@
                 "reservations",
                 "export"
               ]
-            },
-            "description": "Generated from cURL: curl --request GET '{{loc}}/evenement/1/reservations/export'"
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "[GET] Exporter les réservations CSV (Annulées incluses)",
+          "name": "[GET] Exporter les réservations CSV (F19 - Annulées incluses)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/evenements/1/reservations/export",
+              "raw": "{{baseUrl}}/evenements/1/reservations/export?inclureAnnulees=true",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1179,11 +1009,15 @@
                 "1",
                 "reservations",
                 "export"
+              ],
+              "query": [
+                {
+                  "key": "inclureAnnulees",
+                  "value": "true"
+                }
               ]
-            },
-            "description": "Generated from cURL: curl --request GET '{{loc}}/evenement/1/reservations/export?inclureAnnulees=true'"
-          },
-          "response": []
+            }
+          }
         }
       ]
     }

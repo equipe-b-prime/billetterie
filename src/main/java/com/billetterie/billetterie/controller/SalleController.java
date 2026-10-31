@@ -150,12 +150,9 @@ public class SalleController {
     public Response<ResponseDto> getPlacesBySalle(
             @Parameter(description = "Identifiant de la salle", example = "1", required = true)
             @PathVariable Long id,
-            @Parameter(description = "Nom de la catégorie pour filtrer les places", example = "VIP")
+            @Parameter(description = "Nom de la catégorie pour filtrer les places (optionnel)", example = "OR")
             @RequestParam(name = "categorie", required = false) String categorie) {
-        if (categorie != null && !categorie.isBlank()) {
-            return new Response<>(salleService.getPlacesBySalle(id, categorie));
-        }
-        return new Response<>(salleService.findBySalleIdOrderByRangAscNumeroAsc(id));
+        return new Response<>(salleService.getPlacesBySalle(id, categorie));
     }
 
     /**

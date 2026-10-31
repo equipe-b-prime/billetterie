@@ -1,6 +1,7 @@
 package com.billetterie.billetterie.dto;
 
 import com.billetterie.billetterie.service.AbstractClean;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -17,10 +18,12 @@ public class CategorieRequestDto extends AbstractClean implements RequestDto {
     private String nom;
     private String description;
 
+    @JsonSetter
     public void setNom(String nom) {
         this.nom = cleanText(nom);
     }
 
+    @JsonSetter
     public void setDescription(String description) {
         this.description = cleanText(description);
     }

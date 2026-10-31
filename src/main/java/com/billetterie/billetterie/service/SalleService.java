@@ -213,7 +213,10 @@ public class SalleService extends AbstractCrudService {
                 .toList();
     }
 
-    public List<ResponseDto> getPlacesBySalle(Long id,String libelle) {
+    public List<ResponseDto> getPlacesBySalle(Long id, String libelle) {
+        if (libelle == null || libelle.isBlank()) {
+            return findBySalleIdOrderByRangAscNumeroAsc(id);
+        }
         List<Place> places = placeRepository.findBySalleIdAndCategorieLibelleIgnoreCase(id, libelle);
         if (places.isEmpty()) {
             if (!salleRepository.existsById(id)) {
@@ -225,7 +228,6 @@ public class SalleService extends AbstractCrudService {
                 .map(placeService::toDtoSansSalle)
                 .map(dto -> (ResponseDto) dto)
                 .toList();
-
     }
 
     public List<ResponseDto> getEvenementsBySalleId(Long id) {

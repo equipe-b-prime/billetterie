@@ -1,6 +1,7 @@
 package com.billetterie.billetterie.dto;
 
 import com.billetterie.billetterie.service.AbstractClean;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -23,14 +24,17 @@ public class SalleRequestDto extends AbstractClean implements RequestDto {
     @NotBlank(message = "L'adresse est obligatoire")
     private String adresse;
 
+    @JsonSetter
     public void setNom(String nom) {
         this.nom = cleanText(nom);
     }
 
+    @JsonSetter
     public void setVille(String ville) {
         this.ville = cleanText(ville);
     }
 
+    @JsonSetter
     public void setAdresse(String adresse) {
         this.adresse = cleanText(adresse);
     }

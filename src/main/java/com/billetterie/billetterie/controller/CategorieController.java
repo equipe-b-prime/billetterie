@@ -22,10 +22,22 @@ public class CategorieController {
 
     private final CategorieService categorieService;
 
+    /**
+     * Constructeur injectant le service métier des catégories.
+     *
+     * @param categorieService le service des catégories
+     */
     public CategorieController(CategorieService categorieService) {
         this.categorieService = categorieService;
     }
 
+    /**
+     * Récupère la liste paginée de toutes les catégories.
+     *
+     * @param page le numéro de la page (index à 0)
+     * @param size le nombre d'éléments par page
+     * @return Response<ResponseDto> la liste des catégories
+     */
     @Operation(
             summary = "Lister les catégories",
             description = "Retourne la liste paginée de toutes les catégories enregistrées."
@@ -39,11 +51,17 @@ public class CategorieController {
         return new Response<>(categorieService.getAll(page, size));
     }
 
+    /**
+     * Récupère une catégorie par son identifiant unique.
+     *
+     * @param id l'identifiant de la catégorie
+     * @return Response<ResponseDto> les détails de la catégorie trouvée
+     * @throws Throwable si la catégorie n'existe pas
+     */
     @Operation(
             summary = "Obtenir une catégorie par ID",
             description = "Retourne les détails d'une catégorie à partir de son identifiant unique."
     )
-
     @GetMapping("/{id}")
     public Response<ResponseDto> getById(
             @Parameter(description = "Identifiant de la catégorie", example = "1", required = true)
@@ -51,6 +69,13 @@ public class CategorieController {
         return new Response<>(categorieService.getById(id));
     }
 
+    /**
+     * Recherche une catégorie à partir de son libellé exact.
+     *
+     * @param nom le libellé de la catégorie
+     * @return Response<ResponseDto> les détails de la catégorie trouvée
+     * @throws Throwable si aucune catégorie ne correspond
+     */
     @Operation(
             summary = "Rechercher une catégorie par nom",
             description = "Recherche une catégorie spécifique à partir de son libellé exact."
@@ -62,6 +87,12 @@ public class CategorieController {
         return new Response<>(categorieService.getByNom(nom));
     }
 
+    /**
+     * Crée une nouvelle catégorie de place.
+     *
+     * @param categorieRequest les informations de la catégorie à créer
+     * @return Response<ResponseDto> les détails de la catégorie créée
+     */
     @Operation(
             summary = "Créer une catégorie",
             description = "Ajoute une nouvelle catégorie dans le système."
@@ -76,11 +107,17 @@ public class CategorieController {
         return new Response<>(categorieService.create(categorieRequest));
     }
 
+    /**
+     * Met à jour les informations d'une catégorie existante.
+     *
+     * @param id               l'identifiant de la catégorie à modifier
+     * @param categorieRequest les nouvelles informations de la catégorie
+     * @return Response<ResponseDto> les détails de la catégorie mise à jour
+     */
     @Operation(
             summary = "Modifier une catégorie",
             description = "Met à jour les informations d'une catégorie existante."
     )
-
     @PutMapping("/{id}")
     public Response<ResponseDto> update(
             @Parameter(description = "Identifiant de la catégorie à modifier", example = "1", required = true)
@@ -89,11 +126,17 @@ public class CategorieController {
         return new Response<>(categorieService.update(id, categorieRequest));
     }
 
+    /**
+     * Supprime une catégorie du système.
+     *
+     * @param id l'identifiant de la catégorie à supprimer
+     * @return Response<ResponseDto> les détails de la catégorie supprimée
+     * @throws Throwable si la catégorie n'existe pas ou est utilisée
+     */
     @Operation(
             summary = "Supprimer une catégorie",
             description = "Supprime une catégorie à partir de son identifiant."
     )
-
     @DeleteMapping("/{id}")
     public Response<ResponseDto> delete(
             @Parameter(description = "Identifiant de la catégorie à supprimer", example = "1", required = true)
